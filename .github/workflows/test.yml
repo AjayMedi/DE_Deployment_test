@@ -11,7 +11,7 @@ env:
 jobs:
   merge:
     runs-on: ubuntu-latest
-    
+    	
     steps:
     - name: Check if PR is merged
       if: github.event.pull_request.merged == true
@@ -107,29 +107,29 @@ jobs:
         fi
  
     - name: Build
-        runs-on: ubuntu-latest
-        steps:
-          - name: List Files and Remove ZIPs
-            run: |
-              ls -lash
-              rm -f *.zip
+      runs-on: ubuntu-latest
+      steps:
+        - name: List Files and Remove ZIPs
+          run: |
+            ls -lash
+            rm -f *.zip
 
-          - name: Zip and Archive Source Code
-            run: |
-              zip -r "src-${ucdVersion}.zip" src
-              echo "Archiving src-${ucdVersion}.zip"
-              mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
-              echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+        - name: Zip and Archive Source Code
+          run: |
+            zip -r "src-${ucdVersion}.zip" src
+            echo "Archiving src-${ucdVersion}.zip"
+            mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+            echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
 
-          - name: Zip and Archive cf-deploy
-            run: |
-              zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
-              echo "Archiving cf-deploy-${ucdVersion}.zip"
-              mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
-              echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+        - name: Zip and Archive cf-deploy
+          run: |
+            zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
+            echo "Archiving cf-deploy-${ucdVersion}.zip"
+            mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+            echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
 
-          - name: List Archived Files
-            run: ls -lash
+        - name: List Archived Files
+          run: ls -lash    
 			
     - name: UCD Publish
       runs-on: ubuntu-latest
