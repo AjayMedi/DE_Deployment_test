@@ -7,50 +7,50 @@ on:
 
 env:
   jenkinsProperties: 'pipeline.properties'
-  def isProd = false
-    def isDevelop = false
-    def isDevelop2 = false
-    def isModel = false
-    def isStage = false
-    def isProd2 = false
-    def isTest = false
-    def version = '0.1.1'
-    def commitId = ''
-    def ucdComponentName = ''
-    def ucdApplicationName = ''
-    def ucdProcessName = ''
-    def recipients = ''
-    def ucdEnv = ''
-    //Parameters used/set in daPRValidation
-    def crNo = 'none'
-    def release = 'none'
-    def deploymentOrder = 'none'
-    def isLast = 'true'
-    def testCases = 'none'
-    def functionalArea = 'none'
-    def details = 'none'
+  isProd: false
+  isDevelop: false
+  isDevelop2: false
+  isModel: false
+  isStage: false
+  isProd2: false
+  isTest: false
+  version: '0.1.1'
+  commitId: ''
+  ucdComponentName: ''
+  ucdApplicationName: ''
+  ucdProcessName: ''
+  recipients: ''
+  ucdEnv: ''
+  //Parameters used/set in daPRValidation
+  crNo: 'none'
+  release: 'none'
+  deploymentOrder: 'none'
+  isLast: 'true'
+  testCases: 'none'
+  functionalArea: 'none'
+  details: 'none'
 
-    def unitTest = false
-    def unitTestStatus = 'none'
-    def prDefaultApprovers = ''
-    def prCreator = ''
-    def prTs = ''
-    def prApprover = ''
-    def prApproverTs = ''
-    def buildStartTime = ''
+  unitTest: false
+  unitTestStatus: 'none'
+  prDefaultApprovers: ''
+  prCreator: ''
+  prTs: ''
+  prApprover: ''
+  prApproverTs: ''
+  buildStartTime: ''
 
-    def envName = ''
-    def ucdVersion = ''
+  envName: ''
+  ucdVersion: ''
 
-    def isCRRequired = false
-    def isTestCaseRequired = false
-    def isPRRequired = false
-    def globalDev02Recipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
-    def globalDevRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
-    def globalModelRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
-    def globalProdRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
-    def globalTestRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
-    def pipelineException = ''
+  isCRRequired: false
+  isTestCaseRequired: false
+  isPRRequired: false
+  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
+  pipelineException: ''
 
 jobs:
   merge:
