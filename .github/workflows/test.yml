@@ -177,53 +177,53 @@ jobs:
     }
 
     post:
-  failure:
-    emailext(
-      mimeType: 'text/html',
-      subject: "CI-CD - ${envName} - ${ucdComponentName} Build Failed!",
-      body: """CI-CD - ${envName} - ${ucdComponentName} Build Failed!
-        <BR>
-        <BR> Component Name: ${ucdComponentName}
-        <BR> Environment: ${envName}
-        <BR>
-        <BR> CR No.: ${crNo}
-        <BR> Functional Area : ${functionalArea}
-        <BR> Release: ${release}
-        <BR> Deployment Order: ${deploymentOrder}
-        <BR> Details: ${details}
-        <BR>
-        <BR> Bitbucket Branch Name: ${BRANCH_NAME}
-        <BR> Bitbucket CommitId: ${commitId}
-        <BR> Build Version: ${ucdVersion}
-        <BR>
-        <BR> Integration Testing - Test Cases: ${testCases}
-        <BR>
-        <BR> Build Error: "${pipelineException}"
-        <BR>
-        <BR>
-        <BR>
-        <p>Console output (last 1500 lines):<hr><pre>\${BUILD_LOG, maxLines=1500}</pre></p>""",
-      to: "${recipients}"
-    )
-   success:
-    emailext(
-      mimeType: 'text/html',
-      subject: "CI-CD - ${envName} - ${ucdComponentName} Build Success!",
-      body: """CI-CD - ${envName} - ${ucdComponentName} Build Success!
-        <BR>
-        <BR> Component Name: ${ucdComponentName}
-        <BR> Environment: ${envName}
-        <BR>
-        <BR> CR No.: ${crNo}
-        <BR> Functional Area : ${functionalArea}
-        <BR> Release: ${release}
-        <BR> Deployment Order: ${deploymentOrder}
-        <BR> Details: ${details}
-        <BR>
-        <BR> Bitbucket Branch Name: ${BRANCH_NAME}
-        <BR> Bitbucket CommitId: ${commitId}
-        <BR>
-        <BR> Integration Testing - Test Cases: ${testCases}
-        <BR>""",
-      to: "${recipients}"
-    )
+      failure:
+        emailext(
+          mimeType: 'text/html',
+          subject: "CI-CD - ${envName} - ${ucdComponentName} Build Failed!",
+          body: """CI-CD - ${envName} - ${ucdComponentName} Build Failed!
+            <BR>
+            <BR> Component Name: ${ucdComponentName}
+            <BR> Environment: ${envName}
+            <BR>
+            <BR> CR No.: ${crNo}
+            <BR> Functional Area : ${functionalArea}
+            <BR> Release: ${release}
+            <BR> Deployment Order: ${deploymentOrder}
+            <BR> Details: ${details}
+            <BR>
+            <BR> Bitbucket Branch Name: ${BRANCH_NAME}
+            <BR> Bitbucket CommitId: ${commitId}
+            <BR> Build Version: ${ucdVersion}
+            <BR>
+            <BR> Integration Testing - Test Cases: ${testCases}
+            <BR>
+            <BR> Build Error: "${pipelineException}"
+            <BR>
+            <BR>
+            <BR>
+            <p>Console output (last 1500 lines):<hr><pre>\${BUILD_LOG, maxLines=1500}</pre></p>""",
+          to: "${recipients}"
+        )
+      success:
+        emailext(
+          mimeType: 'text/html',
+          subject: "CI-CD - ${envName} - ${ucdComponentName} Build Success!",
+          body: """CI-CD - ${envName} - ${ucdComponentName} Build Success!
+            <BR>
+            <BR> Component Name: ${ucdComponentName}
+            <BR> Environment: ${envName}
+            <BR>
+            <BR> CR No.: ${crNo}
+            <BR> Functional Area : ${functionalArea}
+            <BR> Release: ${release}
+            <BR> Deployment Order: ${deploymentOrder}
+            <BR> Details: ${details}
+            <BR>
+            <BR> Bitbucket Branch Name: ${BRANCH_NAME}
+            <BR> Bitbucket CommitId: ${commitId}
+            <BR>
+            <BR> Integration Testing - Test Cases: ${testCases}
+            <BR>""",
+          to: "${recipients}"
+        )
