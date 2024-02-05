@@ -1,0 +1,80 @@
+Description: AWS CloudFormation Template - LambdaFunction
+Parameters:
+  awsAccountName:
+    Type: String
+  env:
+    Type: String
+  envShortName:
+    Type: String
+  group:
+    Type: String
+  lambdaSuffix:
+    Type: String
+  awsAccountId:
+    Type: String
+  codeBucket:
+    Type: String
+  codeS3Key:
+    Type: String
+  awsRegion:
+    Type: String
+Mappings:
+  EnvironmentMap:
+    dev:
+      layer: "alm_etl_layer:66"
+    model:
+      layer: "alm-etl-layer:15"
+    prod:
+      layer: "alm_etl_layer:5"
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: "main.lambda_handler"
+      FunctionName: { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/app-config/ci-cd/resource-names/lambda-functions/lf_testLambda}}",
+                              { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ] }
+      Role: !Join
+              - ''
+              - - 'arn:aws:iam::'
+                - !Ref awsAccountId
+                - ':role/'
+                - { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/app-config/ci-cd/resource-names/execution-role/lf_testLambda}}",
+                                { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ]}
+      Description: "Created this lambda functionrs for testing CI/CD Pipeline setup"
+      MemorySize: "1024"
+      Layers:
+        - { "Fn::Join" : ["", ["arn:aws:lambda:", { "Ref" : "awsRegion" }, ":", { "Ref" : "awsAccountId" }, ":layer:", { "Fn::FindInMap" : [ "EnvironmentMap", { "Ref" : "env" }, "layer"]} ]] }
+      Code:
+        S3Bucket: { "Ref" : "codeBucket" }
+        S3Key: { "Ref" : "codeS3Key" }
+      Runtime: "python3.11"
+      Timeout: "600"
+      Environment:
+        Variables:
+          ENVIRONMENT: { "Ref" : "env" }
+      VpcConfig:
+        SecurityGroupIds:
+          - { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/network-config/datalake-primary-vpc/security-groups/s-lambda-to-s3-gateway}}",
+                          { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ]}
+          - { "Fn::Sub": [ "{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/network-config/datalake-primary-vpc/security-groups/s-lambda-to-sns}}",
+                           { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ] }
+        SubnetIds:
+          - { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/network-config/datalake-primary-vpc/subnets/subnet-ingestion-zone-1-a}}",
+                                 { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ]}
+          - { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/network-config/datalake-primary-vpc/subnets/subnet-ingestion-zone-1-b}}",
+                          { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ]}
+      Tags:
+        - Key: "ameritas:name"
+          Value: { "Fn::Sub": ["{{resolve:ssm:/${ParamAccountName}/datalake/${ParamEnv}/app-config/ci-cd/resource-names/lambda-functions/lf_testLambda}}",
+                               { "ParamAccountName": { "Ref": "awsAccountName" },"ParamEnv": { "Ref": "env" } } ]}
+        - Key: "ameritas:application-id"
+          Value: "datalake foundation"
+        - Key: "ameritas:application-role"
+          Value: "testLambda"
+        - Key: "ameritas:external-facing"
+          Value: "internal"
+        - Key: "ameritas:data-sensitivity"
+          Value: "NA"
+        - Key: "ameritas:data-classification"
+          Value: "Not Confidential"
