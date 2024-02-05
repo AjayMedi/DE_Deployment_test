@@ -11,8 +11,7 @@ env:
 jobs:
   merge:
     runs-on: ubuntu-latest
-    #runs-on: ohcirghbrnr1p
-	
+    
     steps:
     - name: Check if PR is merged
       if: github.event.pull_request.merged == true
