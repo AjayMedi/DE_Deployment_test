@@ -21,7 +21,7 @@ env:
   ucdProcessName: ''
   recipients: ''
   ucdEnv: ''
-  //Parameters used/set in daPRValidation
+  #Parameters used/set in daPRValidation
   crNo: 'none'
   release: 'none'
   deploymentOrder: 'none'
