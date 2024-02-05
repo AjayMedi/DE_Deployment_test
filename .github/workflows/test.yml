@@ -7,174 +7,216 @@ on:
 
 env:
   jenkinsProperties: 'pipeline.properties'
+  def isProd = false
+    def isDevelop = false
+    def isDevelop2 = false
+    def isModel = false
+    def isStage = false
+    def isProd2 = false
+    def isTest = false
+    def version = '0.1.1'
+    def commitId = ''
+    def ucdComponentName = ''
+    def ucdApplicationName = ''
+    def ucdProcessName = ''
+    def recipients = ''
+    def ucdEnv = ''
+    //Parameters used/set in daPRValidation
+    def crNo = 'none'
+    def release = 'none'
+    def deploymentOrder = 'none'
+    def isLast = 'true'
+    def testCases = 'none'
+    def functionalArea = 'none'
+    def details = 'none'
+
+    def unitTest = false
+    def unitTestStatus = 'none'
+    def prDefaultApprovers = ''
+    def prCreator = ''
+    def prTs = ''
+    def prApprover = ''
+    def prApproverTs = ''
+    def buildStartTime = ''
+
+    def envName = ''
+    def ucdVersion = ''
+
+    def isCRRequired = false
+    def isTestCaseRequired = false
+    def isPRRequired = false
+    def globalDev02Recipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
+    def globalDevRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
+    def globalModelRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
+    def globalProdRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
+    def globalTestRecipients = "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
+    def pipelineException = ''
 
 jobs:
   merge:
-    runs-on: ubuntu-latest 	
+    runs-on: ubuntu-latest
     steps:
-    - name: Check if PR is merged
-      if: github.event.pull_request.merged == true
-      run: |
-        PR_BRANCH=$(echo ${{ github.event.pull_request.head.ref }})
-        TARGET_BRANCH=$(echo ${{ github.event.pull_request.base.ref }})
-        echo "Merging $PR_BRANCH to $TARGET_BRANCH"
+      - name: Check if PR is merged
+        if: github.event.pull_request.merged == true
+        run: |
+          PR_BRANCH=$(echo ${{ github.event.pull_request.head.ref }})
+          TARGET_BRANCH=$(echo ${{ github.event.pull_request.base.ref }})
+          echo "Merging $PR_BRANCH to $TARGET_BRANCH"
 
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Set Up Environment
-      run: |
-        try {
-          buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
+      - name: Set Up Environment
+        run: |
+          try {
+            buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
 
-          echo "Reading configuration from ${jenkinsProperties}"
-          tempProps = readProperties file: jenkinsProperties
+            echo "Reading configuration from ${jenkinsProperties}"
+            tempProps = readProperties file: jenkinsProperties
 
-          ucdComponentName = tempProps.ucdComponentName
-          ucdApplicationName = tempProps.ucdApplicationName
-          ucdProcessName = tempProps.ucdProcessName
-          devRecipients = tempProps.devRecipients
-          modelRecipients = tempProps.modelRecipients
-          prodRecipients = tempProps.prodRecipients
-          successRecipients = tempProps.successRecipients
-          unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
+            ucdComponentName = tempProps.ucdComponentName
+            ucdApplicationName = tempProps.ucdApplicationName
+            ucdProcessName = tempProps.ucdProcessName
+            devRecipients = tempProps.devRecipients
+            modelRecipients = tempProps.modelRecipients
+            prodRecipients = tempProps.prodRecipients
+            successRecipients = tempProps.successRecipients
+            unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
 
-          # Set Flags
-          isDevelop = BRANCH_NAME.contains('dev/') ? true : false
-          isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
-          isTest = BRANCH_NAME.contains('test/') ? true : false
-          isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
-          isModel = BRANCH_NAME.contains('release/') ? true : false
-          isProd = BRANCH_NAME.equals('master') ? true : false
+            # Set Flags
+            isDevelop = BRANCH_NAME.contains('dev/') ? true : false
+            isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
+            isTest = BRANCH_NAME.contains('test/') ? true : false
+            isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
+            isModel = BRANCH_NAME.contains('release/') ? true : false
+            isProd = BRANCH_NAME.equals('master') ? true : false
 
-          if (isProd) {
-            ucdEnv = 'prod'
-            isCRRequired = true
-            isPRRequired = true
-            recipients = "$prodRecipients,$globalProdRecipients"
-          } else if (isProd2) {
-            ucdEnv = 'prod2'
-            isCRRequired = false
-            isPRRequired = false
-            recipients = "$prodRecipients,$globalProdRecipients"
-          } else if (isModel) {
-            ucdEnv = 'model'
-            isCRRequired = true
-            isPRRequired = true
-            recipients = "$modelRecipients,$globalModelRecipients"
-          } else if (isTest) {
-            ucdEnv = 'test'
-            isCRRequired = true
-            isTestCaseRequired = true
-            isPRRequired = true
-            recipients = "$modelRecipients,$globalTestRecipients"
-          } else if (isDevelop) {
-            ucdEnv = 'dev'
-            recipients = "$devRecipients,$globalDevRecipients"
-          } else if (isDevelop2) {
-            ucdEnv = 'dev-02'
-            recipients = "$devRecipients,$globalDev02Recipients"
+            if (isProd) {
+              ucdEnv = 'prod'
+              isCRRequired = true
+              isPRRequired = true
+              recipients = "$prodRecipients,$globalProdRecipients"
+            } else if (isProd2) {
+              ucdEnv = 'prod2'
+              isCRRequired = false
+              isPRRequired = false
+              recipients = "$prodRecipients,$globalProdRecipients"
+            } else if (isModel) {
+              ucdEnv = 'model'
+              isCRRequired = true
+              isPRRequired = true
+              recipients = "$modelRecipients,$globalModelRecipients"
+            } else if (isTest) {
+              ucdEnv = 'test'
+              isCRRequired = true
+              isTestCaseRequired = true
+              isPRRequired = true
+              recipients = "$modelRecipients,$globalTestRecipients"
+            } else if (isDevelop) {
+              ucdEnv = 'dev'
+              recipients = "$devRecipients,$globalDevRecipients"
+            } else if (isDevelop2) {
+              ucdEnv = 'dev-02'
+              recipients = "$devRecipients,$globalDev02Recipients"
+            }
+
+            envName = ucdEnv.toUpperCase()
+            unique_id = System.currentTimeMillis()
+            ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+            commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+            echo("commitId: " + commitId)
+            gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
+            echo("gitLog: " + gitLog)
+
+            # Validate PR title format and get deployment details
+            (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
+          } catch (Exception e) {
+            pipelineException = e
+            echo "Error: $pipelineException"
+            exit 1
           }
 
-          envName = ucdEnv.toUpperCase()
-          unique_id = System.currentTimeMillis()
-          ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
-          commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-          echo("commitId: " + commitId)
-          gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
-          echo("gitLog: " + gitLog)
+      - name: Unit Test
+        if: ${{ unitTest == true }}
+        run: |
+          echo "Running Unit Test..."
+          if docker build -t myimage . && docker run myimage && docker rmi myimage; then
+            unitTestStatus='Success!'
+          else
+            echo "Error during Unit Test"
+            unitTestStatus='none'
+            exit 1
+          fi
 
-          # Validate PR title format and get deployment details
-          (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
-        } 
-        catch (Exception e) {
-          pipelineException = e
-          echo "Error: $pipelineException"
-          exit 1
-        }
-    
-    - name: Unit Test
-      if: ${{ unitTest == true }}
-      run: |
-        echo "Running Unit Test..."
-        if docker build -t myimage . && docker run myimage && docker rmi myimage; then
-          unitTestStatus='Success!'
-        else
-          echo "Error during Unit Test"
-          unitTestStatus='none'
-          exit 1
-        fi
- 
-    - name: Build
-      runs-on: ubuntu-latest
-      steps:
-        - name: List Files and Remove ZIPs
-          run: |
-            ls -lash
-            rm -f *.zip
+      - name: Build
+        runs-on: ubuntu-latest
+        steps:
+          - name: List Files and Remove ZIPs
+            run: |
+              ls -lash
+              rm -f *.zip
 
-        - name: Zip and Archive Source Code
-          run: |
-            zip -r "src-${ucdVersion}.zip" src
-            echo "Archiving src-${ucdVersion}.zip"
-            mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
-            echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+          - name: Zip and Archive Source Code
+            run: |
+              zip -r "src-${ucdVersion}.zip" src
+              echo "Archiving src-${ucdVersion}.zip"
+              mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+              echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
 
-        - name: Zip and Archive cf-deploy
-          run: |
-            zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
-            echo "Archiving cf-deploy-${ucdVersion}.zip"
-            mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
-            echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+          - name: Zip and Archive cf-deploy
+            run: |
+              zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
+              echo "Archiving cf-deploy-${ucdVersion}.zip"
+              mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+              echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
 
-        - name: List Archived Files
-          run: ls -lash   
-			
-    - name: UCD Publish
-      runs-on: ubuntu-latest
-      steps:
-        - name: Publish to UCD
-          run: |
-            echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
-            def ucdArtifacts = "*.zip"
+          - name: List Archived Files
+            run: ls -lash
 
-            echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
+      - name: UCD Publish
+        runs-on: ubuntu-latest
+        steps:
+          - name: Publish to UCD
+            run: |
+              echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
+              def ucdArtifacts = "*.zip"
 
-            ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)
-			
-	- name: Trigger UCD Deploy
-      runs-on: ubuntu-latest
-      steps:
-        - name: UCD Deploy
-          run: |
-            echo "Deploying app through UDC environment: ${ucdEnv}, Process: ${ucdProcessName}, Component: ${ucdComponentName}, ucdVersion: ${ucdVersion}"
-            # ucdDeploy(ucdApplicationName, ucdComponentName, ucdVersion, ucdEnv, ucdProcessName)
+              echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
 
-            def jsonInput = "{\"application\":\"${ucdApplicationName}\",\"description\":\"[ CR#: ${crNo} ],[Release:${release}],[FunctionalArea:${functionalArea}],[Component Name: ${ucdComponentName}],[Deployment Order: ${deploymentOrder}]\",\"applicationProcess\":\"${ucdProcessName}\",\"environment\":\"${ucdEnv}\",\"onlyChanged\":\"false\",\"properties\":{\"CRNumber\":\"${crNo}\",\"crNo\":\"${crNo}\",\"testCases\":\"${testCases}\",\"unitTest\":\"${unitTestStatus}\",\"prDefaultApprovers\":\"${prDefaultApprovers}\",\"prCreator\":\"${prCreator}\",\"prTs\":\"${prTs}\",\"prApprover\":\"${prApprover}\",\"prApproverTs\":\"${prApproverTs}\",\"projectRreleaseVersion\":\"${release}\",\"recipients\":\"${recipients}\",\"commitId\":\"${commitId}\",\"deploymentOrder\":\"${deploymentOrder}\",\"buildStartTime\":\"${buildStartTime}\",\"branchName\":\"${BRANCH_NAME}\",\"functionalArea\":\"${functionalArea}\",\"details\":\"${details}\"},\"versions\":[{\"version\":\"${ucdVersion}\",\"component\":\"${ucdComponentName}\"}]}"
-            def ucdProd2 = "prod2"
-            def jsonUcdProd2 = "{\"application\":\"${ucdApplicationName}\",\"description\":\"[ CR#: ${crNo} ],[Release:${release}],[FunctionalArea:${functionalArea}],[Component Name: ${ucdComponentName}],[Deployment Order: ${deploymentOrder}]\",\"applicationProcess\":\"${ucdProcessName}\",\"environment\":\"${ucdProd2}\",\"onlyChanged\":\"false\",\"properties\":{\"CRNumber\":\"${crNo}\",\"crNo\":\"${crNo}\",\"testCases\":\"${testCases}\",\"unitTest\":\"${unitTestStatus}\",\"prDefaultApprovers\":\"${prDefaultApprovers}\",\"prCreator\":\"${prCreator}\",\"prTs\":\"${prTs}\",\"prApprover\":\"${prApprover}\",\"prApproverTs\":\"${prApproverTs}\",\"projectRreleaseVersion\":\"${release}\",\"recipients\":\"${recipients}\",\"commitId\":\"${commitId}\",\"deploymentOrder\":\"${deploymentOrder}\",\"buildStartTime\":\"${buildStartTime}\",\"branchName\":\"${BRANCH_NAME}\",\"functionalArea\":\"${functionalArea}\",\"details\":\"${details}\"},\"versions\":[{\"version\":\"${ucdVersion}\",\"component\":\"${ucdComponentName}\"}]}"
-            echo "ucdDeployJsonInput: ${jsonInput}"
+              ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)
 
-            withCredentials([usernamePassword(credentialsId: '2046289a-688e-4ac5-8180-4d686c797aaf',
-                  usernameVariable: 'username', passwordVariable: 'apiToken')]) {
-                echo "User: $username, Pwd: $apiToken"
+      - name: Trigger UCD Deploy
+        runs-on: ubuntu-latest
+        steps:
+          - name: UCD Deploy
+            run: |
+              echo "Deploying app through UDC environment: ${ucdEnv}, Process: ${ucdProcessName}, Component: ${ucdComponentName}, ucdVersion: ${ucdVersion}"
+              # ucdDeploy(ucdApplicationName, ucdComponentName, ucdVersion, ucdEnv, ucdProcessName)
 
-                sh("curl -k -u PasswordIsAuthToken:${apiToken} \
-                    https://ucd.ameritas.com/cli/applicationProcessRequest/request \
-                    -H 'Accept: application/json' \
-                    -X PUT -d '${jsonInput}'")
+              def jsonInput = "{\"application\":\"${ucdApplicationName}\",\"description\":\"[ CR#: ${crNo} ],[Release:${release}],[FunctionalArea:${functionalArea}],[Component Name: ${ucdComponentName}],[Deployment Order: ${deploymentOrder}]\",\"applicationProcess\":\"${ucdProcessName}\",\"environment\":\"${ucdEnv}\",\"onlyChanged\":\"false\",\"properties\":{\"CRNumber\":\"${crNo}\",\"crNo\":\"${crNo}\",\"testCases\":\"${testCases}\",\"unitTest\":\"${unitTestStatus}\",\"prDefaultApprovers\":\"${prDefaultApprovers}\",\"prCreator\":\"${prCreator}\",\"prTs\":\"${prTs}\",\"prApprover\":\"${prApprover}\",\"prApproverTs\":\"${prApproverTs}\",\"projectRreleaseVersion\":\"${release}\",\"recipients\":\"${recipients}\",\"commitId\":\"${commitId}\",\"deploymentOrder\":\"${deploymentOrder}\",\"buildStartTime\":\"${buildStartTime}\",\"branchName\":\"${BRANCH_NAME}\",\"functionalArea\":\"${functionalArea}\",\"details\":\"${details}\"},\"versions\":[{\"version\":\"${ucdVersion}\",\"component\":\"${ucdComponentName}\"}]}"
+              def ucdProd2 = "prod2"
+              def jsonUcdProd2 = "{\"application\":\"${ucdApplicationName}\",\"description\":\"[ CR#: ${crNo} ],[Release:${release}],[FunctionalArea:${functionalArea}],[Component Name: ${ucdComponentName}],[Deployment Order: ${deploymentOrder}]\",\"applicationProcess\":\"${ucdProcessName}\",\"environment\":\"${ucdProd2}\",\"onlyChanged\":\"false\",\"properties\":{\"CRNumber\":\"${crNo}\",\"crNo\":\"${crNo}\",\"testCases\":\"${testCases}\",\"unitTest\":\"${unitTestStatus}\",\"prDefaultApprovers\":\"${prDefaultApprovers}\",\"prCreator\":\"${prCreator}\",\"prTs\":\"${prTs}\",\"prApprover\":\"${prApprover}\",\"prApproverTs\":\"${prApproverTs}\",\"projectRreleaseVersion\":\"${release}\",\"recipients\":\"${recipients}\",\"commitId\":\"${commitId}\",\"deploymentOrder\":\"${deploymentOrder}\",\"buildStartTime\":\"${buildStartTime}\",\"branchName\":\"${BRANCH_NAME}\",\"functionalArea\":\"${functionalArea}\",\"details\":\"${details}\"},\"versions\":[{\"version\":\"${ucdVersion}\",\"component\":\"${ucdComponentName}\"}]}"
+              echo "ucdDeployJsonInput: ${jsonInput}"
 
-                if (isProd) {
-                    echo "UCD trigger - Prod2 Deployment"
-                    echo "ucdDeployJsonInput: ${jsonUcdProd2}"
+              withCredentials([usernamePassword(credentialsId: '2046289a-688e-4ac5-8180-4d686c797aaf',
+                    usernameVariable: 'username', passwordVariable: 'apiToken')]) {
+                  echo "User: $username, Pwd: $apiToken"
 
-                    sh("curl -k -u PasswordIsAuthToken:${apiToken} \
-                        https://ucd.ameritas.com/cli/applicationProcessRequest/request \
-                        -H 'Accept: application/json' \
-                        -X PUT -d '${jsonUcdProd2}'")
-                }
-        }
-    }
+                  sh("curl -k -u PasswordIsAuthToken:${apiToken} \
+                      https://ucd.ameritas.com/cli/applicationProcessRequest/request \
+                      -H 'Accept: application/json' \
+                      -X PUT -d '${jsonInput}'")
+
+                  if (isProd) {
+                      echo "UCD trigger - Prod2 Deployment"
+                      echo "ucdDeployJsonInput: ${jsonUcdProd2}"
+
+                      sh("curl -k -u PasswordIsAuthToken:${apiToken} \
+                          https://ucd.ameritas.com/cli/applicationProcessRequest/request \
+                          -H 'Accept: application/json' \
+                          -X PUT -d '${jsonUcdProd2}'")
+                  }
+          }
 
     post:
       failure:
