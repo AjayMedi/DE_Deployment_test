@@ -65,15 +65,6 @@ jobs:
 
       - name: Checkout Code
         uses: actions/checkout@v2
-		
-	  - name: Check if workflow file is modified
-        run: |
-          if git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -q 'myworks.yaml'; then
-            echo "Workflow file modified. Continuing with the workflow."
-          else
-            echo "No modifications to the workflow file. Skipping workflow execution."
-            exit 78 # Exit code 78 skips the workflow without failing
-          fi
 
       - name: Set Up Environment
         run: |
