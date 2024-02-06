@@ -158,10 +158,7 @@ jobs:
             exit 1
           fi
 
-      - name: Build
-        runs-on: ubuntu-latest
-        steps:
-          - name: List Files and Remove ZIPs
-            run: |
-              ls -lash
-              rm -f *.zip
+      - name: List Files and Remove ZIPs
+        run: |
+          ls -lash
+          rm -f *.zip
