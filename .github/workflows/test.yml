@@ -145,3 +145,15 @@ jobs:
             echo "Error: $pipelineException"
             exit 1
           }
+
+      - name: Unit Test
+        if: ${{ unitTest == true }}
+        run: |
+          echo "Running Unit Test..."
+          if docker build -t myimage . && docker run myimage && docker rmi myimage; then
+            unitTestStatus='Success!'
+          else
+            echo "Error during Unit Test"
+            unitTestStatus='none'
+            exit 1
+          fi
