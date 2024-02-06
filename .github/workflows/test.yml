@@ -171,4 +171,5 @@ jobs:
               echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
 
           - name: List Archived Files
-            run: ls -lash
+            run:
+			        command: ls -lash
