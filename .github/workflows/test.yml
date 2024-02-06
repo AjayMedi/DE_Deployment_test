@@ -75,3 +75,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
+      - name: Set Up Environment
+        run: |
+          try {
+            buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
+
+            echo "Reading configuration from ${jenkinsProperties}"
+            tempProps = readProperties file: jenkinsProperties
+
+            ucdComponentName = tempProps.ucdComponentName
+            ucdApplicationName = tempProps.ucdApplicationName
+            ucdProcessName = tempProps.ucdProcessName
+            devRecipients = tempProps.devRecipients
+            modelRecipients = tempProps.modelRecipients
+            prodRecipients = tempProps.prodRecipients
+            successRecipients = tempProps.successRecipients
+            unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
+
+            # Set Flags
+            isDevelop = BRANCH_NAME.contains('dev/') ? true : false
+            isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
+            isTest = BRANCH_NAME.contains('test/') ? true : false
+            isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
+            isModel = BRANCH_NAME.contains('release/') ? true : false
+            isProd = BRANCH_NAME.equals('master') ? true : false
