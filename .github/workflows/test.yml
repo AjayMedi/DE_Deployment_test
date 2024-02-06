@@ -1,164 +1,46 @@
-name: Merge Workflow
+name: Java CI with Maven
 
 on:
-  pull_request:
-    types:
-      - closed
-
-env:
-  jenkinsProperties: 'pipeline.properties'
-  isProd: false
-  isDevelop: false
-  isDevelop2: false
-  isModel: false
-  isStage: false
-  isProd2: false
-  isTest: false
-  version: '0.1.1'
-  commitId: ''
-  ucdComponentName: ''
-  ucdApplicationName: ''
-  ucdProcessName: ''
-  recipients: ''
-  ucdEnv: ''
-  #Parameters used/set in daPRValidation
-  crNo: 'none'
-  release: 'none'
-  deploymentOrder: 'none'
-  isLast: 'true'
-  testCases: 'none'
-  functionalArea: 'none'
-  details: 'none'
-
-  unitTest: false
-  unitTestStatus: 'none'
-  prDefaultApprovers: ''
-  prCreator: ''
-  prTs: ''
-  prApprover: ''
-  prApproverTs: ''
-  buildStartTime: ''
-
-  envName: ''
-  ucdVersion: ''
-
-  isCRRequired: false
-  isTestCaseRequired: false
-  isPRRequired: false
-  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
-  pipelineException: ''
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment to deploy to
+        options:
+          - dev
+          - test
+          - model
+          - prod
+      version:
+        required: true
+        type: string
 
 jobs:
-  merge:
+  build: 
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check if PR is merged
-        if: github.event.pull_request.merged == true
-        run: |
-          PR_BRANCH=$(echo ${{ github.event.pull_request.head.ref }})
-          TARGET_BRANCH=$(echo ${{ github.event.pull_request.base.ref }})
-          echo "Merging $PR_BRANCH to $TARGET_BRANCH"
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
 
-      - name: Set Up Environment
-        run: |
-          try {
-            buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
 
-            echo "Reading configuration from ${jenkinsProperties}"
-            tempProps = readProperties file: jenkinsProperties
-
-            ucdComponentName = tempProps.ucdComponentName
-            ucdApplicationName = tempProps.ucdApplicationName
-            ucdProcessName = tempProps.ucdProcessName
-            devRecipients = tempProps.devRecipients
-            modelRecipients = tempProps.modelRecipients
-            prodRecipients = tempProps.prodRecipients
-            successRecipients = tempProps.successRecipients
-            unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
-
-            # Set Flags
-            isDevelop = BRANCH_NAME.contains('dev/') ? true : false
-            isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
-            isTest = BRANCH_NAME.contains('test/') ? true : false
-            isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
-            isModel = BRANCH_NAME.contains('release/') ? true : false
-            isProd = BRANCH_NAME.equals('master') ? true : false
-
-            if (isProd) {
-              ucdEnv = 'prod'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isProd2) {
-              ucdEnv = 'prod2'
-              isCRRequired = false
-              isPRRequired = false
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isModel) {
-              ucdEnv = 'model'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalModelRecipients"
-            } else if (isTest) {
-              ucdEnv = 'test'
-              isCRRequired = true
-              isTestCaseRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalTestRecipients"
-            } else if (isDevelop) {
-              ucdEnv = 'dev'
-              recipients = "$devRecipients,$globalDevRecipients"
-            } else if (isDevelop2) {
-              ucdEnv = 'dev-02'
-              recipients = "$devRecipients,$globalDev02Recipients"
-            }
-
-            envName = ucdEnv.toUpperCase()
-            unique_id = System.currentTimeMillis()
-            ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
-            commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-            echo("commitId: " + commitId)
-            gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
-            echo("gitLog: " + gitLog)
-
-            # Validate PR title format and get deployment details
-            (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
-          } catch (Exception e) {
-            pipelineException = e
-            echo "Error: $pipelineException"
-            exit 1
-          }
-
-      - name: Unit Test
-        if: ${{ unitTest == true }}
-        run: |
-          echo "Running Unit Test..."
-          if docker build -t myimage . && docker run myimage && docker rmi myimage; then
-            unitTestStatus='Success!'
-          else
-            echo "Error during Unit Test"
-            unitTestStatus='none'
-            exit 1
-          fi
-
-      - name: Build
-        runs-on: ubuntu-latest
-        steps:
-          - name: List Files and Remove ZIPs
-            run: |
-              ls -lash
-              rm -f *.zip
-
-          - name: Zip and Archive Source Code
-            run: |
-              zip -r "src-${ucdVersion}.zip" src
-              echo "Archiving src-${ucdVersion}.zip"
-              mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
-              echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+    - name: Build Docker image
+      run: |
+        docker build -t my-image:latest .
+        docker tag my-image:latest ajaymedi/batch8:va1
+    - name: Push Docker image to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker push ajaymedi/batch8:va1
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
