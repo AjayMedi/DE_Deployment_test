@@ -100,3 +100,48 @@ jobs:
             isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
             isModel = BRANCH_NAME.contains('release/') ? true : false
             isProd = BRANCH_NAME.equals('master') ? true : false
+
+            if (isProd) {
+              ucdEnv = 'prod'
+              isCRRequired = true
+              isPRRequired = true
+              recipients = "$prodRecipients,$globalProdRecipients"
+            } else if (isProd2) {
+              ucdEnv = 'prod2'
+              isCRRequired = false
+              isPRRequired = false
+              recipients = "$prodRecipients,$globalProdRecipients"
+            } else if (isModel) {
+              ucdEnv = 'model'
+              isCRRequired = true
+              isPRRequired = true
+              recipients = "$modelRecipients,$globalModelRecipients"
+            } else if (isTest) {
+              ucdEnv = 'test'
+              isCRRequired = true
+              isTestCaseRequired = true
+              isPRRequired = true
+              recipients = "$modelRecipients,$globalTestRecipients"
+            } else if (isDevelop) {
+              ucdEnv = 'dev'
+              recipients = "$devRecipients,$globalDevRecipients"
+            } else if (isDevelop2) {
+              ucdEnv = 'dev-02'
+              recipients = "$devRecipients,$globalDev02Recipients"
+            }
+
+            envName = ucdEnv.toUpperCase()
+            unique_id = System.currentTimeMillis()
+            ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+            commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+            echo("commitId: " + commitId)
+            gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
+            echo("gitLog: " + gitLog)
+
+            # Validate PR title format and get deployment details
+            (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
+          } catch (Exception e) {
+            pipelineException = e
+            echo "Error: $pipelineException"
+            exit 1
+          }
