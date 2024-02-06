@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Merge Workflow
 
 on:
   workflow_dispatch:
@@ -15,32 +15,65 @@ on:
         required: true
         type: string
 
+
+env:
+  jenkinsProperties: 'pipeline.properties'
+  isProd: false
+  isDevelop: false
+  isDevelop2: false
+  isModel: false
+  isStage: false
+  isProd2: false
+  isTest: false
+  version: '0.1.1'
+  commitId: ''
+  ucdComponentName: ''
+  ucdApplicationName: ''
+  ucdProcessName: ''
+  recipients: ''
+  ucdEnv: ''
+  #Parameters used/set in daPRValidation
+  crNo: 'none'
+  release: 'none'
+  deploymentOrder: 'none'
+  isLast: 'true'
+  testCases: 'none'
+  functionalArea: 'none'
+  details: 'none'
+
+  unitTest: false
+  unitTestStatus: 'none'
+  prDefaultApprovers: ''
+  prCreator: ''
+  prTs: ''
+  prApprover: ''
+  prApproverTs: ''
+  buildStartTime: ''
+
+  envName: ''
+  ucdVersion: ''
+
+  isCRRequired: false
+  isTestCaseRequired: false
+  isPRRequired: false
+  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
+  pipelineException: ''
+
 jobs:
-  build: 
+  validate:
     runs-on: ubuntu-latest
-
+	
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-
-    - name: Build Docker image
-      run: |
-        docker build -t my-image:latest .
-        docker tag my-image:latest ajaymedi/batch8:va1
-    - name: Push Docker image to Docker Hub
-      run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-        docker push ajaymedi/batch8:va1
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Checkout Code
+        uses: actions/checkout@v3
+		
+	  - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
