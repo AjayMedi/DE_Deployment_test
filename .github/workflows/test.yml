@@ -147,7 +147,7 @@ jobs:
           }
 
       - name: Unit Test
-        if: ${{ unitTest == true }}
+        if: unitTest == true
         run: |
           echo "Running Unit Test..."
           if docker build -t myimage . && docker run myimage && docker rmi myimage; then
