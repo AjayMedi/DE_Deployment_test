@@ -169,7 +169,3 @@ jobs:
               echo "Archiving cf-deploy-${ucdVersion}.zip"
               mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
               echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
-
-          - name: List Archived Files
-            run:
-              command: ls -lash
