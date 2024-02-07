@@ -188,7 +188,8 @@ jobs:
       - name: Publish to UCD
         run: |
           echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
-          def ucdArtifacts = "*.zip"
+          #def ucdArtifacts = "*.zip"
+          export ucdArtifacts="*.zip"
 
           echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
 
