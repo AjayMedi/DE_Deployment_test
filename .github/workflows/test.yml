@@ -181,15 +181,14 @@ jobs:
 
       - name: List Archived Files
         run: ls -lash
+  UCD Publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish to UCD
+        run: |
+          echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
+          def ucdArtifacts = "*.zip"
 
-      - name: UCD Publish
-        runs-on: ubuntu-latest
-        steps:
-          - name: Publish to UCD
-            run: |
-              echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
-              def ucdArtifacts = "*.zip"
+          echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
 
-              echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
-
-              ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)	
+          ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)	
