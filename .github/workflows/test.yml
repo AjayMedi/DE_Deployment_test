@@ -77,6 +77,7 @@ jobs:
             buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
             echo "Reading configuration from ${jenkinsProperties}"
             tempProps=$(<"${jenkinsProperties}")
+            echo "$tempProps"
 
             ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
             ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
