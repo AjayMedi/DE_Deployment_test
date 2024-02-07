@@ -150,6 +150,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Know present work dir
+        run: pwd
       - name: List Files and Remove ZIPs
         run: |
           ls -lash $GITHUB_WORKSPACE/src
