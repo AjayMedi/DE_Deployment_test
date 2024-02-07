@@ -144,6 +144,9 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
+      - name: Debug - Print tempProps
+        run: echo "$tempProps"
+
       - name: Debug - Print ucdComponentName and ucdVersion
         run: |
           echo "ucdComponentName: ${ucdComponentName}"
