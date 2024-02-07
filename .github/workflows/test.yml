@@ -68,6 +68,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: list files
+        run: ls -lash
 
   validate:
     runs-on: ubuntu-latest
