@@ -63,11 +63,15 @@ env:
   pipelineException: ''
 
 jobs:
-  validate:
+  checkout_and_run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4		
+        uses: actions/checkout@v4
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:	
       - name: Debug - List Files
         run: ls -lash
       - name: Print Present Working Directory
@@ -150,8 +154,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
       - name: Know present work dir
         run: pwd
       - name: know file list
