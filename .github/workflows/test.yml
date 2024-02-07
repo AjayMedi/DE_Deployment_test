@@ -144,11 +144,21 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
+      - name: Archive Code
+        uses: actions/upload-artifact@v3
+        with:
+          name: source-code
+          path: .  # I want to archive the entire directory
 
   build:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
+      - name: Download Code
+        uses: actions/download-artifact@v3
+        with:
+          name: source-code
+          path: .  # I want to download to the current directory
       - name: Know present work dir
         run: pwd
       - name: know file list
@@ -183,6 +193,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
+      - name: Download Code
+        uses: actions/download-artifact@v3
+        with:
+          name: source-code
+          path: .  # I want to download to the current directory
       - name: Debug - Print pipeline.properties
         run: ls -lash
       - name: Publish to UCD
