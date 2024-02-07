@@ -15,7 +15,6 @@ on:
         required: true
         type: string
 
-
 env:
   jenkinsProperties: 'pipeline.properties'
   isProd: false
@@ -32,7 +31,7 @@ env:
   ucdProcessName: ''
   recipients: ''
   ucdEnv: ''
-  #Parameters used/set in daPRValidation
+  # Parameters used/set in daPRValidation
   crNo: 'none'
   release: 'none'
   deploymentOrder: 'none'
@@ -68,97 +67,107 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
+        uses: actions/checkout@v4		
+      - name: Debug - List Files
+        run: ls -lash
 
       - name: Set Up Environment
         run: |
-          try {
-            buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
-
+          (
+            buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
             echo "Reading configuration from ${jenkinsProperties}"
-            tempProps = readProperties file: jenkinsProperties
+            tempProps=$(<"${jenkinsProperties}")
 
-            ucdComponentName = tempProps.ucdComponentName
-            ucdApplicationName = tempProps.ucdApplicationName
-            ucdProcessName = tempProps.ucdProcessName
-            devRecipients = tempProps.devRecipients
-            modelRecipients = tempProps.modelRecipients
-            prodRecipients = tempProps.prodRecipients
-            successRecipients = tempProps.successRecipients
-            unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
+            ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
+            ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
+            ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
+            devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
+            modelRecipients=$(echo "$tempProps" | grep 'modelRecipients' | cut -d'=' -f2)
+            prodRecipients=$(echo "$tempProps" | grep 'prodRecipients' | cut -d'=' -f2)
+            successRecipients=$(echo "$tempProps" | grep 'successRecipients' | cut -d'=' -f2)
+            unitTest=$(echo "$tempProps" | grep 'unitTest' | cut -d'=' -f2)
 
             # Set Flags
-            isDevelop = BRANCH_NAME.contains('dev/') ? true : false
-            isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
-            isTest = BRANCH_NAME.contains('test/') ? true : false
-            isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
-            isModel = BRANCH_NAME.contains('release/') ? true : false
-            isProd = BRANCH_NAME.equals('master') ? true : false
+            isDevelop=$(echo "$BRANCH_NAME" | grep -q 'dev/' && echo true || echo false)
+            isDevelop2=$(echo "$BRANCH_NAME" | grep -q 'dev-02/' && echo true || echo false)
+            isTest=$(echo "$BRANCH_NAME" | grep -q 'test/' && echo true || echo false)
+            isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
+            isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
+            isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
 
-            if (isProd) {
-              ucdEnv = 'prod'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isProd2) {
-              ucdEnv = 'prod2'
-              isCRRequired = false
-              isPRRequired = false
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isModel) {
-              ucdEnv = 'model'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalModelRecipients"
-            } else if (isTest) {
-              ucdEnv = 'test'
-              isCRRequired = true
-              isTestCaseRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalTestRecipients"
-            } else if (isDevelop) {
-              ucdEnv = 'dev'
-              recipients = "$devRecipients,$globalDevRecipients"
-            } else if (isDevelop2) {
-              ucdEnv = 'dev-02'
-              recipients = "$devRecipients,$globalDev02Recipients"
-            }
+            if [ "$isProd" = true ]; then
+              ucdEnv='prod'
+              isCRRequired=true
+              isPRRequired=true
+              recipients="$prodRecipients,$globalProdRecipients"
+            elif [ "$isProd2" = true ]; then
+              ucdEnv='prod2'
+              isCRRequired=false
+              isPRRequired=false
+              recipients="$prodRecipients,$globalProdRecipients"
+            elif [ "$isModel" = true ]; then
+              ucdEnv='model'
+              isCRRequired=true
+              isPRRequired=true
+              recipients="$modelRecipients,$globalModelRecipients"
+            elif [ "$isTest" = true ]; then
+              ucdEnv='test'
+              isCRRequired=true
+              isTestCaseRequired=true
+              isPRRequired=true
+              recipients="$modelRecipients,$globalTestRecipients"
+            elif [ "$isDevelop" = true ]; then
+              ucdEnv='dev'
+              recipients="$devRecipients,$globalDevRecipients"
+            elif [ "$isDevelop2" = true ]; then
+              ucdEnv='dev-02'
+              recipients="$devRecipients,$globalDev02Recipients"
+            fi
 
-            envName = ucdEnv.toUpperCase()
-            unique_id = System.currentTimeMillis()
-            ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
-            commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-            echo("commitId: " + commitId)
-            gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
-            echo("gitLog: " + gitLog)
-
+            envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
+            unique_id=$(date '+%s')
+            ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+            commitId=$(git rev-parse HEAD)
+            echo "commitId: $commitId"
+            gitLog=$(git log -n 1 --pretty=format:%s)
+            echo "gitLog: $gitLog"
+          
             # Validate PR title format and get deployment details
-            (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
-          } catch (Exception e) {
-            pipelineException = e
-            echo "Error: $pipelineException"
-            exit 1
-          }
+            
 
-      - name: Unit Test
-        if: ${{ env.unitTest == true }}
-        run: |
-          echo "Running Unit Test..."
-          if docker build -t myimage . && docker run myimage && docker rmi myimage; then
-            unitTestStatus='Success!'
-          else
-            echo "Error during Unit Test"
-            unitTestStatus='none'
+          # Check the exit code of the script
+          if [ $? -ne 0 ]; then
+            echo "Error occurred in daPRValidation script."
             exit 1
           fi
 
+          # Parse the output of daPRValidation and set environment variables accordingly
+          IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
+          )
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
       - name: List Files and Remove ZIPs
         run: |
+          ls -lash $GITHUB_WORKSPACE/src
+          rm -f $GITHUB_WORKSPACE/src/*.zip
+
+      - name: Zip and Archive Source Code
+        run: |
           ls -lash
-          rm -f *.zip
+          pwd
+          zip -r "src-${ucdVersion}.zip" $GITHUB_WORKSPACE/src
+          echo "Archiving src-${ucdVersion}.zip"
+          mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+
+      - name: Zip and Archive cf-deploy
+        run: |
+          zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
+          echo "Archiving cf-deploy-${ucdVersion}.zip"
+          mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+
+      - name: List Archived Files
+        run: ls -lash
