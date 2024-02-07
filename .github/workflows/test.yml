@@ -154,7 +154,7 @@ jobs:
         run: pwd
       - name: List Files and Remove ZIPs
         run: |
-          ls -lash $GITHUB_WORKSPACE/src
+          ls -lash
           rm -f $GITHUB_WORKSPACE/src/*.zip
 
       - name: Zip and Archive Source Code
