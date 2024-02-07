@@ -182,7 +182,7 @@ jobs:
       - name: List Archived Files
         run: ls -lash
 
-  UCD Publish:
+  UCDPublish:
     runs-on: ubuntu-latest
     steps:
       - name: Publish to UCD
