@@ -144,6 +144,10 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
+      - name: Debug - Print ucdComponentName and ucdVersion
+        run: |
+          echo "ucdComponentName: ${ucdComponentName}"
+          echo "ucdVersion: ${ucdVersion}"
       - name: Archive Code
         uses: actions/upload-artifact@v3
         with:
