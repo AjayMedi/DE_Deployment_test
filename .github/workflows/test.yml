@@ -70,7 +70,8 @@ jobs:
         uses: actions/checkout@v4		
       - name: Debug - List Files
         run: ls -lash
-          pwd
+      - name: Print Present Working Directory
+        run: pwd
 
       - name: Set Up Environment
         run: |
