@@ -150,6 +150,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
       - name: Know present work dir
         run: pwd
       - name: know file list
