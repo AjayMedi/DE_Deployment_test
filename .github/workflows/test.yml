@@ -71,15 +71,6 @@ jobs:
       - name: list files
         run: ls -lash
 
-  validate:
-    runs-on: ubuntu-latest
-    needs: [checkout_and_run]
-    steps:	
-      - name: Debug - List Files
-        run: ls -lash
-      - name: Print Present Working Directory
-        run: pwd
-
       - name: Set Up Environment
         run: |
           (
