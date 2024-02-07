@@ -152,6 +152,8 @@ jobs:
     steps:
       - name: Know present work dir
         run: pwd
+      - name: new file creation
+        run: touch ajaytest
       - name: List Files and Remove ZIPs
         run: |
           ls -lash
