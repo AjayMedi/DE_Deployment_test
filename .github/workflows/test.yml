@@ -146,6 +146,12 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
+      - name: Set Up Environment
+        id: setup_env
+        run: |
+          # ucdComponentName and version variables passing to other jobs
+          echo "::set-output name=ucdComponentName::${ucdComponentName}"
+          echo "::set-output name=ucdVersion::${ucdVersion}"
       - name: Debug - Print tempProps
         run: echo "$tempProps"
 
@@ -168,6 +174,10 @@ jobs:
         with:
           name: source-code
           path: .  # I want to download to the current directory
+      - name: Use ucdComponentName and ucdVersion
+        run: |
+          echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
+          echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
       - name: Know present work dir
         run: pwd
       - name: know file list
@@ -207,6 +217,10 @@ jobs:
         with:
           name: source-code
           path: .  # I want to download to the current directory
+      - name: Use ucdComponentName and ucdVersion
+        run: |
+          echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
+          echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
       - name: Debug - Print pipeline.properties
         run: ls -lash
       - name: Publish to UCD
