@@ -161,13 +161,13 @@ jobs:
       - name: List Files and Remove ZIPs
         run: |
           ls -lash
-          rm -f $GITHUB_WORKSPACE/src/*.zip
+          rm -f *.zip
 
       - name: Zip and Archive Source Code
         run: |
           ls -lash
           pwd
-          zip -r "src-${ucdVersion}.zip" $GITHUB_WORKSPACE/src
+          zip -r "src-${ucdVersion}.zip" src
           echo "Archiving src-${ucdVersion}.zip"
           mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
           echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
