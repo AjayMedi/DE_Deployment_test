@@ -71,6 +71,7 @@ jobs:
 
   validate:
     runs-on: ubuntu-latest
+    needs: [checkout_and_run]
     steps:	
       - name: Debug - List Files
         run: ls -lash
@@ -153,6 +154,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs: [checkout_and_run]
     steps:
       - name: Know present work dir
         run: pwd
@@ -186,6 +188,7 @@ jobs:
 
   UCDPublish:
     runs-on: ubuntu-latest
+    needs: [checkout_and_run]
     steps:
       - name: Debug - Print pipeline.properties
         run: ls -lash
