@@ -80,6 +80,7 @@ jobs:
             echo "$tempProps"
 
             ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
+            echo "$ucdComponentName"
             ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
             ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
             devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
