@@ -186,7 +186,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug - Print pipeline.properties
-        run: cat pipeline.properties
+        run: ls -lash
       - name: Publish to UCD
         run: |
           echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
