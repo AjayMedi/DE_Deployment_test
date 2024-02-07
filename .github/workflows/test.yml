@@ -169,7 +169,7 @@ jobs:
           pwd
           zip -r "src-${ucdVersion}.zip" src
           echo "Archiving src-${ucdVersion}.zip"
-          mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          #mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
           echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
 
       - name: Zip and Archive cf-deploy
