@@ -82,12 +82,8 @@ jobs:
           echo "commitId: $commitId"
           gitLog=$(git log -n 1 --pretty=format:%s)
           echo "gitLog: $gitLog"
-          echo "$tempProps"
-          echo "$ucdComponentName"
-          echo "ucdComponentName=${ucdComponentName}" >> $GITHUB_ENV
-          echo "ucdVersion=${ucdVersion}" >> $GITHUB_ENV
-      - name: Debug - Print tempProps
-        run: echo "$tempProps"
+          echo "ucdComponentName=$ucdComponentName" >> $GITHUB_ENV
+          echo "ucdVersion=$ucdVersion" >> $GITHUB_ENV
 
       - name: Debug - Print ucdComponentName and ucdVersion
         run: |
@@ -110,7 +106,6 @@ jobs:
           path: .  # I want to download to the current directory
       - name: Read ucdComponentName and ucdVersion from File
         run: |
-          source $GITHUB_ENV
           echo "ucdComponentName: $ucdComponentName"
           echo "ucdVersion: $ucdVersion"
       # Other steps for build job...
@@ -126,7 +121,6 @@ jobs:
           path: .  # I want to download to the current directory
       - name: Read ucdComponentName and ucdVersion from File
         run: |
-          source $GITHUB_ENV
           echo "ucdComponentName: $ucdComponentName"
           echo "ucdVersion: $ucdVersion"
       # Other steps for UCDPublish job...
