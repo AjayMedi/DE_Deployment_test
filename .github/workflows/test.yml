@@ -66,8 +66,8 @@ jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
     env:
-      UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
-      UCD_VERSION: ${{ env.ucdVersion }}
+      UCD_COMPONENT_NAME: ucdComponentName
+      UCD_VERSION: ucdVersion
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
