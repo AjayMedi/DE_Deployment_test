@@ -18,14 +18,10 @@ on:
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
-    outputs:
-      ucdComponentName: ${{ steps.set_up_env.outputs.ucdComponentName }}
-      ucdVersion: ${{ steps.set_up_env.outputs.ucdVersion }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Set Up Environment and Write to File
-        id: set_up_env
         run: |
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
           echo "Reading configuration from pipeline.properties"
@@ -86,39 +82,40 @@ jobs:
           echo "commitId: $commitId"
           gitLog=$(git log -n 1 --pretty=format:%s)
           echo "gitLog: $gitLog"
-          echo "$tempProps"
-          echo "::set-output name=ucdComponentName::$ucdComponentName"
-          echo "::set-output name=ucdVersion::$ucdVersion"
-          echo "ucdComponentName=${ucdComponentName}" >> $GITHUB_ENV
-          echo "ucdVersion=${ucdVersion}" >> $GITHUB_ENV
-      - name: Debug - Print ucdComponentName and ucdVersion
-        run: |
-          echo "ucdComponentName: ${{ steps.set_up_env.outputs.ucdComponentName }}"
-          echo "ucdVersion: ${{ steps.set_up_env.outputs.ucdVersion }}"
-      - name: Archive Code
-        uses: actions/upload-artifact@v3
+          echo "$tempProps" > workflow_vars.txt
+          echo "$ucdComponentName" >> workflow_vars.txt
+          echo "$ucdVersion" >> workflow_vars.txt
+          echo "$isCRRequired" >> workflow_vars.txt
+          echo "$isPRRequired" >> workflow_vars.txt
+          echo "$recipients" >> workflow_vars.txt
+      - name: Archive Workflow Vars
+        uses: actions/upload-artifact@v2
         with:
-          name: source-code
-          path: .  # I want to archive the entire directory
+          name: workflow-vars
+          path: workflow_vars.txt
 
   build:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
-      - name: Read ucdComponentName and ucdVersion from File
+      - name: Download Workflow Vars
+        uses: actions/download-artifact@v2
+        with:
+          name: workflow-vars
+      - name: Read Workflow Vars
         run: |
-          source $GITHUB_ENV
-          echo "ucdComponentName: $ucdComponentName"
-          echo "ucdVersion: $ucdVersion"
+          cat workflow_vars.txt
       # Other steps for build job...
 
   UCDPublish:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
-      - name: Read ucdComponentName and ucdVersion from File
+      - name: Download Workflow Vars
+        uses: actions/download-artifact@v2
+        with:
+          name: workflow-vars
+      - name: Read Workflow Vars
         run: |
-          source $GITHUB_ENV
-          echo "ucdComponentName: $ucdComponentName"
-          echo "ucdVersion: $ucdVersion"
+          cat workflow_vars.txt
       # Other steps for UCDPublish job...
