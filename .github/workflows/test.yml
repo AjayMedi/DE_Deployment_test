@@ -149,13 +149,15 @@ jobs:
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           echo "UCD_COMPONENT_NAME=${ucdComponentName}"
           echo "UCD_VERSION=${ucdVersion}"
+          echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
+          echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
           )
           # ucdComponentName and version variables passing to other jobs
           #echo "::set-output name=ucdComponentName::${ucdComponentName}"
           #echo "::set-output name=ucdVersion::${ucdVersion}"
           # Write environment files
-          echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
-          echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
+          #echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
+          #echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
       - name: Debug - Print tempProps
         run: echo "$tempProps"
 
