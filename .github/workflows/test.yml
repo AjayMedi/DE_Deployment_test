@@ -29,6 +29,8 @@ env:
   ucdComponentName: ''
   ucdApplicationName: ''
   ucdProcessName: ''
+  UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
+  UCD_VERSION: ${{ env.ucdVersion }}
   recipients: ''
   ucdEnv: ''
   # Parameters used/set in daPRValidation
