@@ -147,6 +147,8 @@ jobs:
 
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
+          echo "UCD_COMPONENT_NAME=${ucdComponentName}"
+          echo "UCD_VERSION=${ucdVersion}"
           )
           # ucdComponentName and version variables passing to other jobs
           #echo "::set-output name=ucdComponentName::${ucdComponentName}"
