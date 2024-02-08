@@ -146,6 +146,8 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
+          echo "$tempProps"
+          echo "$ucdComponentName"
           # ucdComponentName and version variables passing to other jobs
           echo "::set-output name=ucdComponentName::${ucdComponentName}"
           echo "::set-output name=ucdVersion::${ucdVersion}"
@@ -228,4 +230,4 @@ jobs:
 
           echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
 
-          ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)	
+          ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)
