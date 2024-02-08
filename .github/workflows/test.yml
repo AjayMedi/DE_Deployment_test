@@ -133,6 +133,8 @@ jobs:
             echo "commitId: $commitId"
             gitLog=$(git log -n 1 --pretty=format:%s)
             echo "gitLog: $gitLog"
+            echo "$tempProps"
+            echo "$ucdComponentName"
           
             # Validate PR title format and get deployment details
             
@@ -146,8 +148,6 @@ jobs:
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
           )
-          echo "$tempProps"
-          echo "$ucdComponentName"
           # ucdComponentName and version variables passing to other jobs
           echo "::set-output name=ucdComponentName::${ucdComponentName}"
           echo "::set-output name=ucdVersion::${ucdVersion}"
