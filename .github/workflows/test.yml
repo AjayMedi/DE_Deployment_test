@@ -110,8 +110,7 @@ jobs:
           path: .  # I want to download to the current directory
       - name: Read ucdComponentName and ucdVersion from File
         run: |
-          ucdComponentName=$(grep -oP '(?<=ucdComponentName=).*' $GITHUB_ENV)
-          ucdVersion=$(grep -oP '(?<=ucdVersion=).*' $GITHUB_ENV)
+          source $GITHUB_ENV
           echo "ucdComponentName: $ucdComponentName"
           echo "ucdVersion: $ucdVersion"
       # Other steps for build job...
