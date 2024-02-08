@@ -15,159 +15,84 @@ on:
         required: true
         type: string
 
-env:
-  jenkinsProperties: 'pipeline.properties'
-  isProd: false
-  isDevelop: false
-  isDevelop2: false
-  isModel: false
-  isStage: false
-  isProd2: false
-  isTest: false
-  version: '0.1.1'
-  commitId: ''
-  ucdComponentName: ''
-  ucdApplicationName: ''
-  ucdProcessName: ''
-  recipients: ''
-  ucdEnv: ''
-  # Parameters used/set in daPRValidation
-  crNo: 'none'
-  release: 'none'
-  deploymentOrder: 'none'
-  isLast: 'true'
-  testCases: 'none'
-  functionalArea: 'none'
-  details: 'none'
-
-  unitTest: false
-  unitTestStatus: 'none'
-  prDefaultApprovers: ''
-  prCreator: ''
-  prTs: ''
-  prApprover: ''
-  prApproverTs: ''
-  buildStartTime: ''
-
-  envName: ''
-  ucdVersion: ''
-
-  isCRRequired: false
-  isTestCaseRequired: false
-  isPRRequired: false
-  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
-  pipelineException: ''
-
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
-    env:
-      UCD_COMPONENT_NAME: ucdComponentName
-      UCD_VERSION: ucdVersion
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: list files
-        run: ls -lash
-
-      - name: Set Up Environment
+      - name: Set Up Environment and Write to File
         run: |
-          ( 
-            buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
-            echo "Reading configuration from ${jenkinsProperties}"
-            tempProps=$(<"${jenkinsProperties}")
-            echo "$tempProps"
+          buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
+          echo "Reading configuration from pipeline.properties"
+          tempProps=$(<"pipeline.properties")
+          echo "$tempProps"
 
-            ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
-            echo "$ucdComponentName"
-            ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
-            ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
-            devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
-            modelRecipients=$(echo "$tempProps" | grep 'modelRecipients' | cut -d'=' -f2)
-            prodRecipients=$(echo "$tempProps" | grep 'prodRecipients' | cut -d'=' -f2)
-            successRecipients=$(echo "$tempProps" | grep 'successRecipients' | cut -d'=' -f2)
-            unitTest=$(echo "$tempProps" | grep 'unitTest' | cut -d'=' -f2)
+          ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
+          echo "$ucdComponentName"
+          ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
+          ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
+          devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
+          modelRecipients=$(echo "$tempProps" | grep 'modelRecipients' | cut -d'=' -f2)
+          prodRecipients=$(echo "$tempProps" | grep 'prodRecipients' | cut -d'=' -f2)
+          successRecipients=$(echo "$tempProps" | grep 'successRecipients' | cut -d'=' -f2)
+          unitTest=$(echo "$tempProps" | grep 'unitTest' | cut -d'=' -f2)
 
-            # Set Flags
-            isDevelop=$(echo "$BRANCH_NAME" | grep -q 'dev/' && echo true || echo false)
-            isDevelop2=$(echo "$BRANCH_NAME" | grep -q 'dev-02/' && echo true || echo false)
-            isTest=$(echo "$BRANCH_NAME" | grep -q 'test/' && echo true || echo false)
-            isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
-            isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
-            isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
+          # Set Flags
+          isDevelop=$(echo "$BRANCH_NAME" | grep -q 'dev/' && echo true || echo false)
+          isDevelop2=$(echo "$BRANCH_NAME" | grep -q 'dev-02/' && echo true || echo false)
+          isTest=$(echo "$BRANCH_NAME" | grep -q 'test/' && echo true || echo false)
+          isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
+          isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
+          isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
 
-            if [ "$isProd" = true ]; then
-              ucdEnv='prod'
-              isCRRequired=true
-              isPRRequired=true
-              recipients="$prodRecipients,$globalProdRecipients"
-            elif [ "$isProd2" = true ]; then
-              ucdEnv='prod2'
-              isCRRequired=false
-              isPRRequired=false
-              recipients="$prodRecipients,$globalProdRecipients"
-            elif [ "$isModel" = true ]; then
-              ucdEnv='model'
-              isCRRequired=true
-              isPRRequired=true
-              recipients="$modelRecipients,$globalModelRecipients"
-            elif [ "$isTest" = true ]; then
-              ucdEnv='test'
-              isCRRequired=true
-              isTestCaseRequired=true
-              isPRRequired=true
-              recipients="$modelRecipients,$globalTestRecipients"
-            elif [ "$isDevelop" = true ]; then
-              ucdEnv='dev'
-              recipients="$devRecipients,$globalDevRecipients"
-            elif [ "$isDevelop2" = true ]; then
-              ucdEnv='dev-02'
-              recipients="$devRecipients,$globalDev02Recipients"
-            fi
-
-            envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
-            unique_id=$(date '+%s')
-            ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
-            commitId=$(git rev-parse HEAD)
-            echo "commitId: $commitId"
-            gitLog=$(git log -n 1 --pretty=format:%s)
-            echo "gitLog: $gitLog"
-            echo "$tempProps"
-            echo "$ucdComponentName"
-          
-            # Validate PR title format and get deployment details
-            
-
-          # Check the exit code of the script
-          if [ $? -ne 0 ]; then
-            echo "Error occurred in daPRValidation script."
-            exit 1
+          if [ "$isProd" = true ]; then
+            ucdEnv='prod'
+            isCRRequired=true
+            isPRRequired=true
+            recipients="$prodRecipients,$globalProdRecipients"
+          elif [ "$isProd2" = true ]; then
+            ucdEnv='prod2'
+            isCRRequired=false
+            isPRRequired=false
+            recipients="$prodRecipients,$globalProdRecipients"
+          elif [ "$isModel" = true ]; then
+            ucdEnv='model'
+            isCRRequired=true
+            isPRRequired=true
+            recipients="$modelRecipients,$globalModelRecipients"
+          elif [ "$isTest" = true ]; then
+            ucdEnv='test'
+            isCRRequired=true
+            isTestCaseRequired=true
+            isPRRequired=true
+            recipients="$modelRecipients,$globalTestRecipients"
+          elif [ "$isDevelop" = true ]; then
+            ucdEnv='dev'
+            recipients="$devRecipients,$globalDevRecipients"
+          elif [ "$isDevelop2" = true ]; then
+            ucdEnv='dev-02'
+            recipients="$devRecipients,$globalDev02Recipients"
           fi
 
-          # Parse the output of daPRValidation and set environment variables accordingly
-          IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
-          echo "UCD_COMPONENT_NAME=${ucdComponentName}"
-          echo "UCD_VERSION=${ucdVersion}"
-          echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
-          echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
-          )
-          # ucdComponentName and version variables passing to other jobs
-          #echo "::set-output name=ucdComponentName::${ucdComponentName}"
-          #echo "::set-output name=ucdVersion::${ucdVersion}"
-          # Write environment files
-          #echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
-          #echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
+          envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
+          unique_id=$(date '+%s')
+          ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+          commitId=$(git rev-parse HEAD)
+          echo "commitId: $commitId"
+          gitLog=$(git log -n 1 --pretty=format:%s)
+          echo "gitLog: $gitLog"
+          echo "$tempProps"
+          echo "$ucdComponentName"
+          echo "ucdComponentName=${ucdComponentName}" >> $GITHUB_ENV
+          echo "ucdVersion=${ucdVersion}" >> $GITHUB_ENV
       - name: Debug - Print tempProps
         run: echo "$tempProps"
 
       - name: Debug - Print ucdComponentName and ucdVersion
         run: |
-          echo "ucdComponentName: ${ucdComponentName}"
-          echo "ucdVersion: ${ucdVersion}"
+          echo "ucdComponentName: $ucdComponentName"
+          echo "ucdVersion: $ucdVersion"
       - name: Archive Code
         uses: actions/upload-artifact@v3
         with:
@@ -177,77 +102,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
-    #env:
-      #UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
-      #UCD_VERSION: ${{ env.ucdVersion }}
     steps:
       - name: Download Code
         uses: actions/download-artifact@v3
         with:
           name: source-code
           path: .  # I want to download to the current directory
-      - name: Use ucdComponentName and ucdVersion
+      - name: Read ucdComponentName and ucdVersion from File
         run: |
-          #echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
-          #echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
-          echo "ucdComponentName: $UCD_COMPONENT_NAME"
-          echo "ucdVersion: $UCD_VERSION"
-      - name: Know present work dir
-        run: pwd
-      - name: know file list
-        run: ls -lash
-      #- name: new file creation
-        #run: touch ajaytest
-      - name: List Files and Remove ZIPs
-        run: |
-          ls -lash
-          rm -f *.zip
-
-      - name: Zip and Archive Source Code
-        run: |
-          ls -lash
-          pwd
-          zip -r "src-${ucdVersion}.zip" src
-          echo "Archiving src-${ucdVersion}.zip"
-          #mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
-          echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
-
-      - name: Zip and Archive cf-deploy
-        run: |
-          zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
-          echo "Archiving cf-deploy-${ucdVersion}.zip"
-          #mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
-          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
-
-      - name: List Archived Files
-        run: ls -lash
+          ucdComponentName=$(grep -oP '(?<=ucdComponentName=).*' $GITHUB_ENV)
+          ucdVersion=$(grep -oP '(?<=ucdVersion=).*' $GITHUB_ENV)
+          echo "ucdComponentName: $ucdComponentName"
+          echo "ucdVersion: $ucdVersion"
+      # Other steps for build job...
 
   UCDPublish:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
-    #env:
-      #UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
-      #UCD_VERSION: ${{ env.ucdVersion }}
     steps:
       - name: Download Code
         uses: actions/download-artifact@v3
         with:
           name: source-code
           path: .  # I want to download to the current directory
-      - name: Use ucdComponentName and ucdVersion
+      - name: Read ucdComponentName and ucdVersion from File
         run: |
-          #echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
-          #echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
-          echo "ucdComponentName: $UCD_COMPONENT_NAME"
-          echo "ucdVersion: $UCD_VERSION"
-      - name: Debug - Print pipeline.properties
-        run: ls -lash
-      - name: Publish to UCD
-        run: |
-          echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
-          #def ucdArtifacts = "*.zip"
-          export ucdArtifacts="*.zip"
-
-          echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
-
-          ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)
+          ucdComponentName=$(grep -oP '(?<=ucdComponentName=).*' $GITHUB_ENV)
+          ucdVersion=$(grep -oP '(?<=ucdVersion=).*' $GITHUB_ENV)
+          echo "ucdComponentName: $ucdComponentName"
+          echo "ucdVersion: $ucdVersion"
+      # Other steps for UCDPublish job...
