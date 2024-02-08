@@ -18,10 +18,14 @@ on:
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
+    outputs:
+      ucdComponentName: ${{ steps.set_up_env.outputs.ucdComponentName }}
+      ucdVersion: ${{ steps.set_up_env.outputs.ucdVersion }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Set Up Environment and Write to File
+        id: set_up_env
         run: |
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
           echo "Reading configuration from pipeline.properties"
@@ -82,13 +86,15 @@ jobs:
           echo "commitId: $commitId"
           gitLog=$(git log -n 1 --pretty=format:%s)
           echo "gitLog: $gitLog"
-          echo "ucdComponentName=$ucdComponentName" >> $GITHUB_ENV
-          echo "ucdVersion=$ucdVersion" >> $GITHUB_ENV
-
+          echo "$tempProps"
+          echo "::set-output name=ucdComponentName::$ucdComponentName"
+          echo "::set-output name=ucdVersion::$ucdVersion"
+          echo "ucdComponentName=${ucdComponentName}" >> $GITHUB_ENV
+          echo "ucdVersion=${ucdVersion}" >> $GITHUB_ENV
       - name: Debug - Print ucdComponentName and ucdVersion
         run: |
-          echo "ucdComponentName: $ucdComponentName"
-          echo "ucdVersion: $ucdVersion"
+          echo "ucdComponentName: ${{ steps.set_up_env.outputs.ucdComponentName }}"
+          echo "ucdVersion: ${{ steps.set_up_env.outputs.ucdVersion }}"
       - name: Archive Code
         uses: actions/upload-artifact@v3
         with:
@@ -99,13 +105,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
-      - name: Download Code
-        uses: actions/download-artifact@v3
-        with:
-          name: source-code
-          path: .  # I want to download to the current directory
       - name: Read ucdComponentName and ucdVersion from File
         run: |
+          source $GITHUB_ENV
           echo "ucdComponentName: $ucdComponentName"
           echo "ucdVersion: $ucdVersion"
       # Other steps for build job...
@@ -114,13 +116,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
-      - name: Download Code
-        uses: actions/download-artifact@v3
-        with:
-          name: source-code
-          path: .  # I want to download to the current directory
       - name: Read ucdComponentName and ucdVersion from File
         run: |
+          source $GITHUB_ENV
           echo "ucdComponentName: $ucdComponentName"
           echo "ucdVersion: $ucdVersion"
       # Other steps for UCDPublish job...
