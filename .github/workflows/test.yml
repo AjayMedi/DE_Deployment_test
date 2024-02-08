@@ -29,8 +29,6 @@ env:
   ucdComponentName: ''
   ucdApplicationName: ''
   ucdProcessName: ''
-  UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
-  UCD_VERSION: ${{ env.ucdVersion }}
   recipients: ''
   ucdEnv: ''
   # Parameters used/set in daPRValidation
@@ -67,6 +65,9 @@ env:
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
+    env:
+      UCD_COMPONENT_NAME: ${{ env.ucdComponentName }}
+      UCD_VERSION: ${{ env.ucdVersion }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -75,7 +76,7 @@ jobs:
 
       - name: Set Up Environment
         run: |
-          (
+          ( 
             buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
             echo "Reading configuration from ${jenkinsProperties}"
             tempProps=$(<"${jenkinsProperties}")
