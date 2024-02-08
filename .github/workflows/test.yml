@@ -108,27 +108,29 @@ jobs:
       # Other steps for build job...
 
   UCDPublish:
-    runs-on: ubuntu-latest
-    needs: [checkout_and_run]
-    steps:
-      - name: Download Workflow Vars
-        uses: actions/download-artifact@v2
-        with:
-          name: workflow-vars
-      - name: Read Workflow Vars
-        run: |
-          cat workflow_vars.txt
-          ucdComponentName=$(head -n 1 workflow_vars.txt)
-          ucdVersion=$(sed -n '2p' workflow_vars.txt)
-      # Other steps for UCDPublish job...
-      - name: Debug - Print pipeline.properties
-        run: ls -lash
-      - name: Publish to UCD
-        run: |
-          echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
-          #def ucdArtifacts = "*.zip"
-          export ucdArtifacts="*.zip"
+  runs-on: ubuntu-latest
+  needs: [checkout_and_run]
+  steps:
+    - name: Download Workflow Vars
+      uses: actions/download-artifact@v2
+      with:
+        name: workflow-vars
+    - name: Read Workflow Vars
+      run: |
+        cat workflow_vars.txt
+        ucdComponentName=$(head -n 1 workflow_vars.txt)
+        ucdVersion=$(sed -n '2p' workflow_vars.txt)
+        isCRRequired=$(sed -n '3p' workflow_vars.txt)
+        isPRRequired=$(sed -n '4p' workflow_vars.txt)
+        recipients=$(sed -n '5p' workflow_vars.txt)
+    # Other steps for UCDPublish job...
+    - name: Debug - Print pipeline.properties
+      run: ls -lash
+    - name: Publish to UCD
+      run: |
+        echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
+        export ucdArtifacts="*.zip"
 
-          echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
+        echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
 
-          ucdTriggerPush("${ucdComponentName}", "${ucdVersion}", "${ucdArtifacts}", true)
+        ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
