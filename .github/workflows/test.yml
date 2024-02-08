@@ -135,4 +135,4 @@ jobs:
           echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
           echo "$ucdComponentName"
           echo "$ucdVersion"
-          ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
+          #ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
