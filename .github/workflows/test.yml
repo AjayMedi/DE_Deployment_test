@@ -147,10 +147,13 @@ jobs:
 
           # Parse the output of daPRValidation and set environment variables accordingly
           IFS=',' read -r crNo release deploymentOrder isLast testCases functionalArea details <<< "$daPRValidationOutput"
-          # ucdComponentName and version variables passing to other jobs
-          echo "::set-output name=ucdComponentName::${ucdComponentName}"
-          echo "::set-output name=ucdVersion::${ucdVersion}"
           )
+          # ucdComponentName and version variables passing to other jobs
+          #echo "::set-output name=ucdComponentName::${ucdComponentName}"
+          #echo "::set-output name=ucdVersion::${ucdVersion}"
+          # Write environment files
+          echo "UCD_COMPONENT_NAME=${ucdComponentName}" >> $GITHUB_ENV
+          echo "UCD_VERSION=${ucdVersion}" >> $GITHUB_ENV
       - name: Debug - Print tempProps
         run: echo "$tempProps"
 
@@ -175,8 +178,10 @@ jobs:
           path: .  # I want to download to the current directory
       - name: Use ucdComponentName and ucdVersion
         run: |
-          echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
-          echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
+          #echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
+          #echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
+          echo "ucdComponentName: $UCD_COMPONENT_NAME"
+          echo "ucdVersion: $UCD_VERSION"
       - name: Know present work dir
         run: pwd
       - name: know file list
@@ -218,8 +223,10 @@ jobs:
           path: .  # I want to download to the current directory
       - name: Use ucdComponentName and ucdVersion
         run: |
-          echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
-          echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
+          #echo "ucdComponentName: ${{ needs.checkout_and_run.outputs.ucdComponentName }}"
+          #echo "ucdVersion: ${{ needs.checkout_and_run.outputs.ucdVersion }}"
+          echo "ucdComponentName: $UCD_COMPONENT_NAME"
+          echo "ucdVersion: $UCD_VERSION"
       - name: Debug - Print pipeline.properties
         run: ls -lash
       - name: Publish to UCD
