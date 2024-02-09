@@ -99,7 +99,7 @@ jobs:
           name: source-code
           path: .
           exclude:
-            - 'workflow_vars.txt'  # Exclude workflow_vars.txt from being packaged with source code
+            - 'workflow_vars.txt'
 
   build:
     runs-on: ubuntu-latest
