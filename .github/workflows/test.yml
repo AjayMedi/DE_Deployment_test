@@ -132,6 +132,7 @@ jobs:
       - name: Publish to UCD
         run: |
           cat workflow_vars.txt
+          ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
           echo "$ucdComponentName"
           echo "$ucdComponentName"
           echo "$ucdVersion"
