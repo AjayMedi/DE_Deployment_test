@@ -118,7 +118,8 @@ jobs:
       - name: Read Workflow Vars
         run: |
           cat workflow_vars.txt
-          ucdComponentName=$(head -n 1 workflow_vars.txt)
+          ucdComponentName=$(grep -o 'ucdComponentName=[^ ]*' workflow_vars.txt | cut -d'=' -f2)
+          #ucdComponentName=$(head -n 1 workflow_vars.txt)
           ucdVersion=$(sed -n '2p' workflow_vars.txt)
           isCRRequired=$(sed -n '3p' workflow_vars.txt)
           isPRRequired=$(sed -n '4p' workflow_vars.txt)
