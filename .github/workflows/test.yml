@@ -65,6 +65,8 @@ env:
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
+    outputs:
+      envName: ${{ steps.set_up_env.outputs.envName }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -123,7 +125,7 @@ jobs:
           fi
 
           envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
-          echo "$envName"
+          echo "::set-output name=envName::$envName"
           unique_id=$(date '+%s')
           ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
           commitId=$(git rev-parse HEAD)
