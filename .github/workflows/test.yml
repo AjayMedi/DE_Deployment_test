@@ -115,20 +115,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: workflow-vars
-      - name: Read Workflow Vars
-        run: |
-          cat workflow_vars.txt
-          ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
-          #ucdComponentName=$(grep -o 'ucdComponentName=[^ ]*' workflow_vars.txt | cut -d'=' -f2)
-          #ucdComponentName=$(head -n 1 workflow_vars.txt)
-          ucdVersion=$(sed -n '2p' workflow_vars.txt)
-          isCRRequired=$(sed -n '3p' workflow_vars.txt)
-          isPRRequired=$(sed -n '4p' workflow_vars.txt)
-          recipients=$(sed -n '5p' workflow_vars.txt)
-          echo "$ucdComponentName"
-      # Other steps for UCDPublish job...
-      - name: Debug - Print pipeline.properties
-        run: ls -lash
       - name: Publish to UCD
         run: |
           cat workflow_vars.txt
