@@ -133,8 +133,9 @@ jobs:
         run: |
           cat workflow_vars.txt
           ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
+          ucdVersion=$(sed -n '8p' workflow_vars.txt)
           echo "$ucdComponentName"
-          echo "$ucdComponentName"
+          echo "testing below now"
           echo "$ucdVersion"
           echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
           export ucdArtifacts="*.zip"
