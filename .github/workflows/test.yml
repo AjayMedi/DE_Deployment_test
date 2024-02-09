@@ -85,7 +85,6 @@ jobs:
           echo "$tempProps" > workflow_vars.txt
           echo "$ucdComponentName" >> workflow_vars.txt
           echo "$ucdVersion" >> workflow_vars.txt
-          echo "$ucdApplicationName" >> workflow_vars.txt
           echo "$isCRRequired" >> workflow_vars.txt
           echo "$isPRRequired" >> workflow_vars.txt
           echo "$recipients" >> workflow_vars.txt
@@ -134,6 +133,7 @@ jobs:
         run: |
           cat workflow_vars.txt
           ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
+          ucdApplicationName=$(grep 'ucdApplicationName=' workflow_vars.txt | cut -d'=' -f2)
           ucdVersion=$(sed -n '8p' workflow_vars.txt)
           echo "$ucdComponentName"
           echo "testing below now"
