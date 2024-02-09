@@ -93,6 +93,13 @@ jobs:
         with:
           name: workflow-vars
           path: workflow_vars.txt
+      - name: Archive Source Code
+        uses: actions/upload-artifact@v2
+        with:
+          name: source-code
+          path: .
+          exclude:
+            - 'workflow_vars.txt'  # Exclude workflow_vars.txt from being packaged with source code
 
   build:
     runs-on: ubuntu-latest
