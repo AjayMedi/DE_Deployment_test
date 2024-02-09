@@ -15,6 +15,53 @@ on:
         required: true
         type: string
 
+env:
+  jenkinsProperties: 'pipeline.properties'
+  isProd: false
+  isDevelop: false
+  isDevelop2: false
+  isModel: false
+  isStage: false
+  isProd2: false
+  isTest: false
+  version: '0.1.1'
+  commitId: ''
+  ucdComponentName: ''
+  ucdApplicationName: ''
+  ucdProcessName: ''
+  recipients: ''
+  ucdEnv: ''
+  # Parameters used/set in daPRValidation
+  crNo: 'none'
+  release: 'none'
+  deploymentOrder: 'none'
+  isLast: 'true'
+  testCases: 'none'
+  functionalArea: 'none'
+  details: 'none'
+
+  unitTest: false
+  unitTestStatus: 'none'
+  prDefaultApprovers: ''
+  prCreator: ''
+  prTs: ''
+  prApprover: ''
+  prApproverTs: ''
+  buildStartTime: ''
+
+  envName: ''
+  ucdVersion: ''
+
+  isCRRequired: false
+  isTestCaseRequired: false
+  isPRRequired: false
+  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
+  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
+  pipelineException: ''
+
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
@@ -171,4 +218,5 @@ jobs:
           echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
           echo "$ucdComponentName"
           echo "$ucdVersion"
+          echo "$envName"
           #ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
