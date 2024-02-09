@@ -98,8 +98,8 @@ jobs:
         with:
           name: source-code
           path: .
-          exclude:
-            - 'workflow_vars.txt'
+      - name: Move workflow_vars.txt out of the source directory
+        run: mv workflow_vars.txt ../
 
   build:
     runs-on: ubuntu-latest
