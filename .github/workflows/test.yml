@@ -98,14 +98,49 @@ jobs:
     runs-on: ubuntu-latest
     needs: [checkout_and_run]
     steps:
-      - name: Download Workflow Vars
-        uses: actions/download-artifact@v2
+      - name: Download Code
+        uses: actions/download-artifact@v3
         with:
-          name: workflow-vars
+          name: source-code
+          path: .  # I want to download to the current directory
+      - name: Read ucdComponentName and ucdVersion from File
+        run: |
+          source $GITHUB_ENV
+          echo "ucdComponentName: $ucdComponentName"
+          echo "ucdVersion: $ucdVersion"
+      - name: Know present work dir
+        run: pwd
+      - name: know file list
+        run: ls -lash
+      #- name: new file creation
+        #run: touch ajaytest
+      - name: List Files and Remove ZIPs
+        run: |
+          ls -lash
+          rm -f *.zip
+
+      - name: Zip and Archive Source Code
+        run: |
+          ls -lash
+          pwd
+          zip -r "src-${ucdVersion}.zip" src
+          echo "Archiving src-${ucdVersion}.zip"
+          #mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+
+      - name: Zip and Archive cf-deploy
+        run: |
+          zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
+          echo "Archiving cf-deploy-${ucdVersion}.zip"
+          #mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+
+      - name: List Archived Files
+        run: ls -lash
       - name: Read Workflow Vars
         run: |
           cat workflow_vars.txt
-      # Other steps for build job...
+      
 
   UCDPublish:
     runs-on: ubuntu-latest
