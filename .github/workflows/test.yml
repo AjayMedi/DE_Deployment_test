@@ -131,6 +131,8 @@ jobs:
         run: ls -lash
       - name: Publish to UCD
         run: |
+          cat workflow_vars.txt
+          echo "$ucdComponentName"
           echo "$ucdComponentName"
           echo "$ucdVersion"
           echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
