@@ -71,8 +71,8 @@ jobs:
           echo "BRANCH_NAME: ${{ github.event.inputs.Environment }}"
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Print Environment Variables
-        run: env
+      #- name: Print Environment Variables
+        #run: env
       - name: Set Up Environment and Write to File
         run: |
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
