@@ -63,13 +63,6 @@ env:
   pipelineException: ''
 
 jobs:
-  Debug_BRANCH_NAME:
-    name: Debug BRANCH_NAME
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug BRANCH_NAME
-        run: |
-          echo "BRANCH_NAME: $BRANCH_NAME"
   checkout_and_run:
     runs-on: ubuntu-latest
     steps:
