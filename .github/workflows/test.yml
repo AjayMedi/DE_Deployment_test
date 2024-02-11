@@ -68,6 +68,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Print Environment Variables  # Add this step
+        run: env
       - name: Set Up Environment and Write to File
         run: |
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
