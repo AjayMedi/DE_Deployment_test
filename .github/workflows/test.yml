@@ -1,9 +1,19 @@
 name: Merge Workflow
 
 on:
-  pull_request:
-    types:
-      - closed
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment to deploy to
+        options:
+          - dev
+          - test
+          - model
+          - prod
+      version:
+        required: true
+        type: string
 
 env:
   jenkinsProperties: 'pipeline.properties'
@@ -21,7 +31,7 @@ env:
   ucdProcessName: ''
   recipients: ''
   ucdEnv: ''
-  #Parameters used/set in daPRValidation
+  # Parameters used/set in daPRValidation
   crNo: 'none'
   release: 'none'
   deploymentOrder: 'none'
@@ -53,122 +63,163 @@ env:
   pipelineException: ''
 
 jobs:
-  merge:
+  checkout_and_run:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if PR is merged
-        if: github.event.pull_request.merged == true
-        run: |
-          PR_BRANCH=$(echo ${{ github.event.pull_request.head.ref }})
-          TARGET_BRANCH=$(echo ${{ github.event.pull_request.base.ref }})
-          echo "Merging $PR_BRANCH to $TARGET_BRANCH"
-
       - name: Checkout Code
-        uses: actions/checkout@v2
-
-      - name: Set Up Environment
+        uses: actions/checkout@v4
+      - name: Print Environment Variables  # Add this step
+        run: env
+      - name: Set Up Environment and Write to File
         run: |
-          try {
-            buildStartTime = sh(returnStdout: true, script: 'date "+%Y-%m-%d %H:%M:%S.000"').trim()
+          buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
+          echo "Reading configuration from pipeline.properties"
+          tempProps=$(<"pipeline.properties")
+          echo "$tempProps"
 
-            echo "Reading configuration from ${jenkinsProperties}"
-            tempProps = readProperties file: jenkinsProperties
+          ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
+          echo "$ucdComponentName"
+          ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
+          ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
+          devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
+          modelRecipients=$(echo "$tempProps" | grep 'modelRecipients' | cut -d'=' -f2)
+          prodRecipients=$(echo "$tempProps" | grep 'prodRecipients' | cut -d'=' -f2)
+          successRecipients=$(echo "$tempProps" | grep 'successRecipients' | cut -d'=' -f2)
+          unitTest=$(echo "$tempProps" | grep 'unitTest' | cut -d'=' -f2)
 
-            ucdComponentName = tempProps.ucdComponentName
-            ucdApplicationName = tempProps.ucdApplicationName
-            ucdProcessName = tempProps.ucdProcessName
-            devRecipients = tempProps.devRecipients
-            modelRecipients = tempProps.modelRecipients
-            prodRecipients = tempProps.prodRecipients
-            successRecipients = tempProps.successRecipients
-            unitTest = tempProps.unitTest != null ? tempProps.unitTest : false
+          # Set Flags
+          isDevelop=$(echo "$BRANCH_NAME" | grep -q 'dev/' && echo true || echo false)
+          isDevelop2=$(echo "$BRANCH_NAME" | grep -q 'dev-02/' && echo true || echo false)
+          isTest=$(echo "$BRANCH_NAME" | grep -q 'test/' && echo true || echo false)
+          isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
+          isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
+          isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
 
-            # Set Flags
-            isDevelop = BRANCH_NAME.contains('dev/') ? true : false
-            isDevelop2 = BRANCH_NAME.contains('dev-02/') ? true : false
-            isTest = BRANCH_NAME.contains('test/') ? true : false
-            isProd2 = BRANCH_NAME.contains('prod2/') ? true : false
-            isModel = BRANCH_NAME.contains('release/') ? true : false
-            isProd = BRANCH_NAME.equals('master') ? true : false
-
-            if (isProd) {
-              ucdEnv = 'prod'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isProd2) {
-              ucdEnv = 'prod2'
-              isCRRequired = false
-              isPRRequired = false
-              recipients = "$prodRecipients,$globalProdRecipients"
-            } else if (isModel) {
-              ucdEnv = 'model'
-              isCRRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalModelRecipients"
-            } else if (isTest) {
-              ucdEnv = 'test'
-              isCRRequired = true
-              isTestCaseRequired = true
-              isPRRequired = true
-              recipients = "$modelRecipients,$globalTestRecipients"
-            } else if (isDevelop) {
-              ucdEnv = 'dev'
-              recipients = "$devRecipients,$globalDevRecipients"
-            } else if (isDevelop2) {
-              ucdEnv = 'dev-02'
-              recipients = "$devRecipients,$globalDev02Recipients"
-            }
-
-            envName = ucdEnv.toUpperCase()
-            unique_id = System.currentTimeMillis()
-            ucdVersion = "${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
-            commitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-            echo("commitId: " + commitId)
-            gitLog = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:%s')
-            echo("gitLog: " + gitLog)
-
-            # Validate PR title format and get deployment details
-            (crNo, release, deploymentOrder, isLast, testCases, functionalArea, details) = daPRValidation(gitLog, isPRRequired, isCRRequired, isTestCaseRequired, envName)
-          } catch (Exception e) {
-            pipelineException = e
-            echo "Error: $pipelineException"
-            exit 1
-          }
-
-      - name: Unit Test
-        if: ${{ unitTest == true }}
-        run: |
-          echo "Running Unit Test..."
-          if docker build -t myimage . && docker run myimage && docker rmi myimage; then
-            unitTestStatus='Success!'
-          else
-            echo "Error during Unit Test"
-            unitTestStatus='none'
-            exit 1
+          if [ "$isProd" = true ]; then
+            ucdEnv='prod'
+            isCRRequired=true
+            isPRRequired=true
+            recipients="$prodRecipients,$globalProdRecipients"
+          elif [ "$isProd2" = true ]; then
+            ucdEnv='prod2'
+            isCRRequired=false
+            isPRRequired=false
+            recipients="$prodRecipients,$globalProdRecipients"
+          elif [ "$isModel" = true ]; then
+            ucdEnv='model'
+            isCRRequired=true
+            isPRRequired=true
+            recipients="$modelRecipients,$globalModelRecipients"
+          elif [ "$isTest" = true ]; then
+            ucdEnv='test'
+            isCRRequired=true
+            isTestCaseRequired=true
+            isPRRequired=true
+            recipients="$modelRecipients,$globalTestRecipients"
+          elif [ "$isDevelop" = true ]; then
+            ucdEnv='dev'
+            recipients="$devRecipients,$globalDevRecipients"
+          elif [ "$isDevelop2" = true ]; then
+            ucdEnv='dev-02'
+            recipients="$devRecipients,$globalDev02Recipients"
           fi
 
-      - name: Build
-        runs-on: ubuntu-latest
-        steps:
-          - name: List Files and Remove ZIPs
-            run: |
-              ls -lash
-              rm -f *.zip
+          envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
+          echo "$ucdEnv"
+          unique_id=$(date '+%s')
+          ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+          commitId=$(git rev-parse HEAD)
+          echo "commitId: $commitId"
+          gitLog=$(git log -n 1 --pretty=format:%s)
+          echo "gitLog: $gitLog"
+          echo "$tempProps" > workflow_vars.txt
+          echo "$ucdComponentName" >> workflow_vars.txt
+          echo "$ucdVersion" >> workflow_vars.txt
+          echo "$isCRRequired" >> workflow_vars.txt
+          echo "$isPRRequired" >> workflow_vars.txt
+          echo "$recipients" >> workflow_vars.txt
+      - name: Archive Workflow Vars
+        uses: actions/upload-artifact@v2
+        with:
+          name: workflow-vars
+          path: workflow_vars.txt
+      - name: Archive Source Code
+        uses: actions/upload-artifact@v2
+        with:
+          name: source-code
+          path: .
+      - name: Move workflow_vars.txt out of the source directory
+        run: mv workflow_vars.txt ../
 
-          - name: Zip and Archive Source Code
-            run: |
-              zip -r "src-${ucdVersion}.zip" src
-              echo "Archiving src-${ucdVersion}.zip"
-              mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
-              echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
+  build:
+    runs-on: ubuntu-latest
+    needs: [checkout_and_run]
+    steps:
+      - name: Download Code
+        uses: actions/download-artifact@v2
+        with:
+          name: source-code
+          path: .  # I want to download to the current directory
+      - name: Read ucdComponentName and ucdVersion from File
+        run: |
+          source $GITHUB_ENV
+          echo "ucdComponentName: $ucdComponentName"
+          echo "ucdVersion: $ucdVersion"
+      - name: Know present work dir
+        run: pwd
+      - name: know file list
+        run: ls -lash
+      #- name: new file creation
+        #run: touch ajaytest
+      - name: List Files and Remove ZIPs
+        run: |
+          ls -lash
+          rm -f *.zip
 
-          - name: Zip and Archive cf-deploy
-            run: |
-              zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
-              echo "Archiving cf-deploy-${ucdVersion}.zip"
-              mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
-              echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+      - name: Zip and Archive Source Code
+        run: |
+          ls -lash
+          pwd
+          zip -r "src-${ucdVersion}.zip" src
+          echo "Archiving src-${ucdVersion}.zip"
+          #mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
 
-          - name: List Archived Files
-            run: ls -lash
+      - name: Zip and Archive cf-deploy
+        run: |
+          zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
+          echo "Archiving cf-deploy-${ucdVersion}.zip"
+          #mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
+
+      - name: List Archived Files
+        run: ls -lash
+      - name: Read Workflow Vars
+        run: |
+          cat workflow_vars.txt
+      
+
+  UCDPublish:
+    runs-on: ubuntu-latest
+    needs: [checkout_and_run]
+    steps:
+      - name: Download Workflow Vars
+        uses: actions/download-artifact@v2
+        with:
+          name: workflow-vars
+      - name: Publish to UCD
+        run: |
+          cat workflow_vars.txt
+          ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
+          ucdApplicationName=$(grep 'ucdApplicationName=' workflow_vars.txt | cut -d'=' -f2)
+          ucdVersion=$(sed -n '8p' workflow_vars.txt)
+          echo "$ucdComponentName"
+          echo "testing below now"
+          echo "$ucdVersion"
+          echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
+          export ucdArtifacts="*.zip"
+          echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
+          echo "$ucdComponentName"
+          echo "$ucdVersion"
+          echo "$envName"
+          #ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
