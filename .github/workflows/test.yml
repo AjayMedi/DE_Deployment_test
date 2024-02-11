@@ -5,7 +5,7 @@ on:
     inputs:
       environment:
         type: choice
-        description: Environment to deploy to
+        description: Environment
         options:
           - dev/
           - test
@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Debug BRANCH_NAME Value
         run: |
-          echo "BRANCH_NAME: ${{ github.event.inputs.Environment to deploy to }}"
+          echo "BRANCH_NAME: ${{ github.event.inputs.Environment }}"
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Print Environment Variables
