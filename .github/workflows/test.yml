@@ -66,10 +66,10 @@ jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug BRANCH_NAME Value
+      - name: Assign environment variable to BRANCH_NAME
         run: |
-          echo "BRANCH_NAME: ${{ github.event.inputs.Environment }}"
-          BRANCH_NAME=${{ github.event.inputs.Environment }}
+          BRANCH_NAME="${{ github.event.inputs.Environment }}"
+          echo "BRANCH_NAME: $BRANCH_NAME"
       - name: Checkout Code
         uses: actions/checkout@v4
       #- name: Print Environment Variables
