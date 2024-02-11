@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Assign environment variable to BRANCH_NAME
         run: |
-          BRANCH_NAME="${{ github.event.inputs.Environment }}"
+          export BRANCH_NAME="${{ github.event.inputs.Environment }}"
           echo "BRANCH_NAME: $BRANCH_NAME"
       - name: Checkout Code
         uses: actions/checkout@v4
