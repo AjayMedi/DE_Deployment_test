@@ -69,6 +69,7 @@ jobs:
       - name: Debug BRANCH_NAME Value
         run: |
           echo "BRANCH_NAME: ${{ github.event.inputs.Environment }}"
+          BRANCH_NAME=${{ github.event.inputs.Environment }}
       - name: Checkout Code
         uses: actions/checkout@v4
       #- name: Print Environment Variables
