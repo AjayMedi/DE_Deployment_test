@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Debug BRANCH_NAME Value
         run: |
-          echo "BRANCH_NAME: ${{ github.event.inputs.version }}"
+          echo "BRANCH_NAME: $BRANCH_NAME"
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Print Environment Variables
