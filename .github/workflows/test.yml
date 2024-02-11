@@ -1,5 +1,5 @@
+---
 name: Merge Workflow
-
 on:
   workflow_dispatch:
     inputs:
@@ -14,9 +14,8 @@ on:
       version:
         required: true
         type: string
-
 env:
-  jenkinsProperties: 'pipeline.properties'
+  jenkinsProperties: pipeline.properties
   isProd: false
   isDevelop: false
   isDevelop2: false
@@ -24,77 +23,100 @@ env:
   isStage: false
   isProd2: false
   isTest: false
-  version: '0.1.1'
-  commitId: ''
-  ucdComponentName: ''
-  ucdApplicationName: ''
-  ucdProcessName: ''
-  recipients: ''
-  ucdEnv: ''
-  # Parameters used/set in daPRValidation
-  crNo: 'none'
-  release: 'none'
-  deploymentOrder: 'none'
-  isLast: 'true'
-  testCases: 'none'
-  functionalArea: 'none'
-  details: 'none'
-
+  version: 0.1.1
+  commitId: ""
+  ucdComponentName: ""
+  ucdApplicationName: ""
+  ucdProcessName: ""
+  recipients: ""
+  ucdEnv: ""
+  crNo: none
+  release: none
+  deploymentOrder: none
+  isLast: "true"
+  testCases: none
+  functionalArea: none
+  details: none
   unitTest: false
-  unitTestStatus: 'none'
-  prDefaultApprovers: ''
-  prCreator: ''
-  prTs: ''
-  prApprover: ''
-  prApproverTs: ''
-  buildStartTime: ''
-
-  envName: ''
-  ucdVersion: ''
-
+  unitTestStatus: none
+  prDefaultApprovers: ""
+  prCreator: ""
+  prTs: ""
+  prApprover: ""
+  prApproverTs: ""
+  buildStartTime: ""
+  envName: ""
+  ucdVersion: ""
   isCRRequired: false
   isTestCaseRequired: false
   isPRRequired: false
-  globalDev02Recipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalDevRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalModelRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalProdRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms"
-  globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
-  pipelineException: ''
-
+  globalDev02Recipients: senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,992ddac0.ameritas.onmicrosoft.com@amer.teams.ms
+  globalDevRecipients: senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,78b2f8da.ameritas.onmicrosoft.com@amer.teams.ms
+  globalModelRecipients: senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,6302b43b.ameritas.onmicrosoft.com@amer.teams.ms
+  globalProdRecipients: senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,10929dd3.ameritas.onmicrosoft.com@amer.teams.ms
+  globalTestRecipients: senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms
+  pipelineException: ""
+Debug_BRANCH_NAME:
+  name: Debug BRANCH_NAME
+  runs-on: ubuntu-latest
+  steps:
+    - name: Debug BRANCH_NAME
+      run: |
+        echo "BRANCH_NAME: $BRANCH_NAME"
 jobs:
   checkout_and_run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Print Environment Variables  # Add this step
+      - name: Print Environment Variables
         run: env
       - name: Set Up Environment and Write to File
-        run: |
+        run: >
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
+
           echo "Reading configuration from pipeline.properties"
+
           tempProps=$(<"pipeline.properties")
+
           echo "$tempProps"
 
+
           ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
+
           echo "$ucdComponentName"
+
           ucdApplicationName=$(echo "$tempProps" | grep 'ucdApplicationName' | cut -d'=' -f2)
+
           ucdProcessName=$(echo "$tempProps" | grep 'ucdProcessName' | cut -d'=' -f2)
+
           devRecipients=$(echo "$tempProps" | grep 'devRecipients' | cut -d'=' -f2)
+
           modelRecipients=$(echo "$tempProps" | grep 'modelRecipients' | cut -d'=' -f2)
+
           prodRecipients=$(echo "$tempProps" | grep 'prodRecipients' | cut -d'=' -f2)
+
           successRecipients=$(echo "$tempProps" | grep 'successRecipients' | cut -d'=' -f2)
+
           unitTest=$(echo "$tempProps" | grep 'unitTest' | cut -d'=' -f2)
 
+
           # Set Flags
+
           isDevelop=$(echo "$BRANCH_NAME" | grep -q 'dev/' && echo true || echo false)
+
           isDevelop2=$(echo "$BRANCH_NAME" | grep -q 'dev-02/' && echo true || echo false)
+
           isTest=$(echo "$BRANCH_NAME" | grep -q 'test/' && echo true || echo false)
+
           isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
+
           isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
+
           isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
+
           echo "hi $BRANCH_NAME"
+
 
           if [ "$isProd" = true ]; then
             ucdEnv='prod'
@@ -125,19 +147,33 @@ jobs:
             recipients="$devRecipients,$globalDev02Recipients"
           fi
 
+
           envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
+
           echo "$ucdEnv"
+
           unique_id=$(date '+%s')
+
           ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
+
           commitId=$(git rev-parse HEAD)
+
           echo "commitId: $commitId"
+
           gitLog=$(git log -n 1 --pretty=format:%s)
+
           echo "gitLog: $gitLog"
+
           echo "$tempProps" > workflow_vars.txt
+
           echo "$ucdComponentName" >> workflow_vars.txt
+
           echo "$ucdVersion" >> workflow_vars.txt
+
           echo "$isCRRequired" >> workflow_vars.txt
+
           echo "$isPRRequired" >> workflow_vars.txt
+
           echo "$recipients" >> workflow_vars.txt
       - name: Archive Workflow Vars
         uses: actions/upload-artifact@v2
@@ -151,16 +187,16 @@ jobs:
           path: .
       - name: Move workflow_vars.txt out of the source directory
         run: mv workflow_vars.txt ../
-
   build:
     runs-on: ubuntu-latest
-    needs: [checkout_and_run]
+    needs:
+      - checkout_and_run
     steps:
       - name: Download Code
         uses: actions/download-artifact@v2
         with:
           name: source-code
-          path: .  # I want to download to the current directory
+          path: .
       - name: Read ucdComponentName and ucdVersion from File
         run: |
           source $GITHUB_ENV
@@ -170,57 +206,72 @@ jobs:
         run: pwd
       - name: know file list
         run: ls -lash
-      #- name: new file creation
-        #run: touch ajaytest
       - name: List Files and Remove ZIPs
         run: |
           ls -lash
           rm -f *.zip
-
       - name: Zip and Archive Source Code
-        run: |
+        run: >
           ls -lash
+
           pwd
+
           zip -r "src-${ucdVersion}.zip" src
+
           echo "Archiving src-${ucdVersion}.zip"
+
           #mv "src-${ucdVersion}.zip" $GITHUB_WORKSPACE
+
           echo "::set-output name=src-zip::${GITHUB_WORKSPACE}/src-${ucdVersion}.zip"
-
       - name: Zip and Archive cf-deploy
-        run: |
+        run: >
           zip -r "cf-deploy-${ucdVersion}.zip" cf-deploy
-          echo "Archiving cf-deploy-${ucdVersion}.zip"
-          #mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
-          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
 
+          echo "Archiving cf-deploy-${ucdVersion}.zip"
+
+          #mv "cf-deploy-${ucdVersion}.zip" $GITHUB_WORKSPACE
+
+          echo "::set-output name=cf-deploy-zip::${GITHUB_WORKSPACE}/cf-deploy-${ucdVersion}.zip"
       - name: List Archived Files
         run: ls -lash
       - name: Read Workflow Vars
         run: |
           cat workflow_vars.txt
-      
-
   UCDPublish:
     runs-on: ubuntu-latest
-    needs: [checkout_and_run]
+    needs:
+      - checkout_and_run
     steps:
       - name: Download Workflow Vars
         uses: actions/download-artifact@v2
         with:
           name: workflow-vars
       - name: Publish to UCD
-        run: |
+        run: >
           cat workflow_vars.txt
+
           ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
+
           ucdApplicationName=$(grep 'ucdApplicationName=' workflow_vars.txt | cut -d'=' -f2)
+
           ucdVersion=$(sed -n '8p' workflow_vars.txt)
+
           echo "$ucdComponentName"
+
           echo "testing below now"
+
           echo "$ucdVersion"
+
           echo "Publishing Component: [${ucdComponentName}], GITHUB_RUN_NUMBER: [${GITHUB_RUN_NUMBER}]"
+
           export ucdArtifacts="*.zip"
+
           echo "Publishing UCD version: [${ucdVersion}], ucdComponentName: [${ucdComponentName}], ucdApplicationName: [${ucdApplicationName}]"
+
           echo "$ucdComponentName"
+
           echo "$ucdVersion"
+
           echo "$envName"
+
           #ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
