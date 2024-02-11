@@ -97,7 +97,7 @@ jobs:
           isProd2=$(echo "$BRANCH_NAME" | grep -q 'prod2/' && echo true || echo false)
           isModel=$(echo "$BRANCH_NAME" | grep -q 'release/' && echo true || echo false)
           isProd=$(echo "$BRANCH_NAME" | grep -q 'master' && echo true || echo false)
-          echo "Is it dev branch $isDevelop"
+          echo "Is it dev branch $BRANCH_NAME"
 
           if [ "$isProd" = true ]; then
             ucdEnv='prod'
