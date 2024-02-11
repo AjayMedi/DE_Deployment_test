@@ -62,21 +62,20 @@ env:
   globalTestRecipients: "senthilganesh.alagumuthurajan@ameritas.com,ajay.medi@ameritas.com,dataandinsights-dataengineering@ameritas.com,DIDEC@ameritas.com,2b378c23.ameritas.onmicrosoft.com@amer.teams.ms"
   pipelineException: ''
 
-Debug_BRANCH_NAME:
-  name: Debug BRANCH_NAME
-  runs-on: ubuntu-latest
-  steps:
-    - name: Debug BRANCH_NAME
-      run: |
-        echo "BRANCH_NAME: $BRANCH_NAME"
-
 jobs:
+  Debug_BRANCH_NAME:
+    name: Debug BRANCH_NAME
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug BRANCH_NAME
+        run: |
+          echo "BRANCH_NAME: $BRANCH_NAME"
   checkout_and_run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Print Environment Variables  # Add this step
+      - name: Print Environment Variables
         run: env
       - name: Set Up Environment and Write to File
         run: |
