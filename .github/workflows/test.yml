@@ -236,11 +236,6 @@ jobs:
           echo "$ucdVersion"
           echo "$envName"
           ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
-      - name: Call UCD Trigger Push
-        run: |
-          source $GITHUB_ENV  # Source the environment variables
-          source workflow_vars.txt  # Source the workflow variables
-          call("myComponent", "${ucdVersion}", "*.zip", true)  # Call the 'call' function
         script:
           |
           def call ( String componentName, String version, String ucdInclude, Boolean ucdIncremental ) {
