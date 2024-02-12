@@ -225,6 +225,7 @@ jobs:
           ucdComponentName=$(grep 'ucdComponentName=' workflow_vars.txt | cut -d'=' -f2)
           ucdApplicationName=$(grep 'ucdApplicationName=' workflow_vars.txt | cut -d'=' -f2)
           ucdVersion=$(sed -n '8p' workflow_vars.txt)
+          envName=$(sed -n '9p' workflow_vars.txt)
           echo "$ucdComponentName"
           echo "testing below now"
           echo "$ucdVersion"
