@@ -135,6 +135,7 @@ jobs:
 
           envName=$(echo "$ucdEnv" | tr '[:lower:]' '[:upper:]')
           echo "$ucdEnv"
+          echo "$envName"
           unique_id=$(date '+%s')
           ucdVersion="${ucdComponentName}:${ucdEnv}-${unique_id}-v1-${GITHUB_RUN_NUMBER}"
           commitId=$(git rev-parse HEAD)
