@@ -84,7 +84,6 @@ jobs:
           tempProps=$(<"pipeline.properties")
           echo "$tempProps"
           echo "$BRANCH_NAME"
-          set -x  # Enable debugging mode
 
           ucdComponentName=$(echo "$tempProps" | grep 'ucdComponentName' | cut -d'=' -f2)
           echo "$ucdComponentName"
