@@ -70,12 +70,14 @@ jobs:
         run: |
           export BRANCH_NAME="${{ github.event.inputs.Environment }}"
           echo "BRANCH_NAME: $BRANCH_NAME"
+          echo "$BRANCH_NAME"
       - name: Checkout Code
         uses: actions/checkout@v4
       #- name: Print Environment Variables
         #run: env
       - name: Set Up Environment and Write to File
         run: |
+          echo "$BRANCH_NAME"
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
           echo "Reading configuration from pipeline.properties"
           tempProps=$(<"pipeline.properties")
