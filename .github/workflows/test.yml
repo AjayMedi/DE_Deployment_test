@@ -236,25 +236,24 @@ jobs:
           echo "$ucdVersion"
           echo "$envName"
           ucdTriggerPush "${ucdComponentName}" "${ucdVersion}" "${ucdArtifacts}" true
-        script:
-          |
-          def call ( String componentName, String version, String ucdInclude, Boolean ucdIncremental ) {
-            echo "Variables passed in ${componentName}, ${version}, ${ucdInclude}, ${ucdIncremental}"
-            step ([$class: 'UCDeployPublisher',
-                    siteName: 'UCD Prod',
-                    component: [
-                        $class: 'com.urbancode.jenkins.plugins.ucdeploy.VersionHelper$VersionBlock',
-                        componentName: componentName,
-                        delivery: [
-                            $class: 'com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper$Push',
-                            pushVersion: version,
-                            baseDir: env.WORKSPACE,
-                            fileIncludePatterns: ucdInclude,
-                            fileExcludePatterns: '',
-                            pushDescription: 'Pushed from Jenkins',
-                            pushIncremental: ucdIncremental,
-                            createSnapshot: version
-                        ]
-                    ]
-                ])
-          }
+      - name: Call UCD Trigger Push
+        run: |
+          echo "Variables passed in ${ucdComponentName}, ${ucdVersion}, *.zip, true"
+          step ([
+                  $class: 'UCDeployPublisher',
+                  siteName: 'UCD Prod',
+                  component: [
+                      $class: 'com.urbancode.jenkins.plugins.ucdeploy.VersionHelper$VersionBlock',
+                      componentName: "${ucdComponentName}",
+                      delivery: [
+                          $class: 'com.urbancode.jenkins.plugins.ucdeploy.DeliveryHelper$Push',
+                          pushVersion: "${ucdVersion}",
+                          baseDir: env.WORKSPACE,
+                          fileIncludePatterns: "*.zip",
+                          fileExcludePatterns: '',
+                          pushDescription: 'Pushed from Jenkins',
+                          pushIncremental: true,
+                          createSnapshot: "${ucdVersion}"
+                      ]
+                  ]
+              ])
