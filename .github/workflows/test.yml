@@ -77,7 +77,8 @@ jobs:
         #run: env
       - name: Set Up Environment and Write to File
         run: |
-          echo "$BRANCH_NAME"
+          export BRANCH_NAME="${{ github.event.inputs.Environment }}"
+          echo "BRANCH_NAME: $BRANCH_NAME"
           buildStartTime=$(date "+%Y-%m-%d %H:%M:%S.000")
           echo "Reading configuration from pipeline.properties"
           tempProps=$(<"pipeline.properties")
